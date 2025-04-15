@@ -13,7 +13,7 @@ i = 0
 train_attributes = []
 train_labels     = []
 for file in tqdm(files, desc="processing training files"):
-    record_iterator = tf.python_io.tf_record_iterator(path=file)
+    record_iterator = tf.compat.v1.io.tf_record_iterator(path=file)
     for string_record in record_iterator:
         example = tf.train.Example()
         example.ParseFromString(string_record)
@@ -37,7 +37,8 @@ i = 0
 test_attributes = []
 test_labels     = []
 for file in tqdm(files, desc="processing testing files"):
-    record_iterator = tf.python_io.tf_record_iterator(path=file)
+    # record_iterator = tf.python_io.tf_record_iterator(path=file)
+    record_iterator = tf.compat.v1.io.tf_record_iterator(path=file)
     for string_record in record_iterator:
         example = tf.train.Example()
         example.ParseFromString(string_record)
