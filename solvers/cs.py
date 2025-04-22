@@ -50,7 +50,7 @@ def GlowCS(args):
         # loading dataset
         trans           = transforms.Compose([transforms.Resize((args.size,args.size)),transforms.ToTensor()])
         test_dataset    = datasets.ImageFolder(test_folder, transform=trans)
-        test_dataloader = torch.utils.data.DataLoader(test_dataset,batch_size=args.batchsize,drop_last=False,shuffle=False)
+        test_dataloader = torch.utils.data.DataLoader(test_dataset,batch_size=args.batchsize,drop_last=True,shuffle=False)
         
         # loading glow configurations
         config_path = modeldir+"/configs.json"
@@ -314,7 +314,7 @@ def GANCS(args):
         # loading dataset
         trans           = transforms.Compose([transforms.Resize((args.size,args.size)),transforms.ToTensor()])
         test_dataset    = datasets.ImageFolder(test_folder, transform=trans)
-        test_dataloader = torch.utils.data.DataLoader(test_dataset,batch_size=args.batchsize,drop_last=False,shuffle=False)
+        test_dataloader = torch.utils.data.DataLoader(test_dataset,batch_size=args.batchsize,drop_last=True,shuffle=False)
         
         # sensing matrix
         A = np.random.normal(0,1/np.sqrt(m), size=(args.size*args.size*3,m))

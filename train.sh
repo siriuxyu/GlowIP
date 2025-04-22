@@ -1,6 +1,7 @@
 rm output.txt
 rm errput.txt
 rm py_output.txt
+rm ip_log.txt
 
 bsub < job.sh
 
