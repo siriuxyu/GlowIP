@@ -181,7 +181,7 @@ def GlowCS(args):
                     y_gen       = torch.matmul(x_gen_flat, A) 
                     global residual_t
                     residual_t = ((y_gen - y_true)**2).sum(dim=1).mean()
-                    if args.z_penalty_squared:
+                    if args.z_penalty_unsquared:
                         z_reg_loss_t= gamma*(z_sampled.norm(dim=1)**2).mean()
                     else:
                         z_reg_loss_t= gamma*z_sampled.norm(dim=1).mean()
