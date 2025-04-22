@@ -195,8 +195,8 @@ def GlowCS(args):
                     optimizer.step(closure)
                     recorded_z.append(z_sampled.data.cpu().numpy())
                     residual.append(residual_t.item())
-                except:
-                    # try may not work due to instability in the reverse direction.
+                except Exception as e:
+                    print(f"\n[ERROR] Step failed due to: {e}")
                     skip_to_next = True
                     break
             
