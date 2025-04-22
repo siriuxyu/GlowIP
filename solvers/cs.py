@@ -3,7 +3,9 @@ import torch
 from torchvision import datasets
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
-from skimage.measure import compare_psnr, compare_ssim
+# from skimage.measure import compare_psnr, compare_ssim
+from skimage.metrics import peak_signal_noise_ratio as compare_psnr
+from skimage.metrics import structural_similarity as compare_ssim
 from skimage.transform import resize
 import PIL
 import skimage.io as sio
