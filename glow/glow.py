@@ -5,8 +5,9 @@ from .squeeze import Squeeze
 from .split import Split
 import numpy as np
 import skimage.io as sio
-from skimage.transform import resize
-import torch.utils.checkpoint as checkpoint
+# from skimage.transform import resize
+# import torch.utils.checkpoint as checkpoint
+
 # device 
 if torch.cuda.is_available():
     device = "cuda"
@@ -60,17 +61,28 @@ class Glow(nn.Module):
             Z = []
             if logdet is None:
                 logdet = torch.tensor(0.0,requires_grad=False,device=self.device,dtype=torch.float)
-            for i in range( len(self.glow_modules) ):
-                module_name = self.glow_modules[i].__class__.__name__
-                if  module_name == "Squeeze":
-                    x, logdet = self.glow_modules[i](x, logdet=logdet, reverse=False)
-                elif  module_name == "Flow":
-                    x, logdet, actloss = self.glow_modules[i](x, logdet=logdet, reverse=False)
-                elif  module_name == "Split":
-                    x, z = self.glow_modules[i](x, reverse=False)
+            for module in self.glow_modules:
+                module_name = module.__class__.__name__
+                if module_name == "Squeeze":
+                    x, logdet = module(x, logdet=logdet, reverse=False)
+                elif module_name == "Flow":
+                    x, logdet, actloss = module(x, logdet=logdet, reverse=False)
+                elif module_name == "Split":
+                    x, z = module(x, reverse=False)
                     Z.append(z)
-                else:
+                else:   
                     raise "Unknown Layer"
+            # for i in range( len(self.glow_modules) ):
+            #     module_name = self.glow_modules[i].__class__.__name__
+            #     if  module_name == "Squeeze":
+            #         x, logdet = self.glow_modules[i](x, logdet=logdet, reverse=False)
+            #     elif  module_name == "Flow":
+            #         x, logdet, actloss = self.glow_modules[i](x, logdet=logdet, reverse=False)
+            #     elif  module_name == "Split":
+            #         x, z = self.glow_modules[i](x, reverse=False)
+            #         Z.append(z)
+            #     else:
+            #         raise "Unknown Layer"
 
             Z.append(x)
             

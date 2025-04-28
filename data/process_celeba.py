@@ -8,7 +8,7 @@ import os
 
 files = glob("./celeba/celeba-tfr/train/*.tfrecords")
 save_train_dir = "./celeba_preprocessed/train/train"
-os.makedirs(save_train_dir)
+os.makedirs(save_train_dir, exist_ok=True)
 i = 0
 train_attributes = []
 train_labels     = []
