@@ -119,11 +119,11 @@ class Glow(nn.Module):
             self.init_resizer = True
         z_ = [ z_.view(n,-1) for z_ in z]
         z_ = torch.cat(z_, dim=1)
-        mean  = 0; logs = 0
+        mean   =  0; logs = 0
         logdet += float(-np.log(256.) * h*w*c)
-        logpz = -0.5*(logs*2. + ((z_- mean)**2)/np.exp(logs*2.) + float(np.log(2 * np.pi))).sum(-1)
-        nll   = -(logdet + logpz).mean()
-        nll   = nll / float(np.log(2.)*h*w*c)
+        logpz  =  -0.5*(logs*2. + ((z_- mean)**2)/np.exp(logs*2.) + float(np.log(2 * np.pi))).sum(-1)
+        nll    =  -(logdet + logpz).mean()
+        nll    =  nll / float(np.log(2.)*h*w*c)
         return nll, -logdet.mean().item(),-logpz.mean().item(), z_.mean().item(), z_.std().item()
     
     def preprocess(self, x, clone=False):

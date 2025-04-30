@@ -11,7 +11,7 @@ else:
 
 
 class ActNorm(nn.Module):
-    def __init__(self, channels,device):
+    def __init__(self, channels, device):
         super(ActNorm, self).__init__()
         size       = (1,channels,1,1)
         self.logs  = torch.nn.Parameter(torch.zeros(size,dtype=torch.float,device=device,requires_grad=True))
@@ -40,7 +40,7 @@ class ActNorm(nn.Module):
             x =  x - self.b
             return x
         
-    def apply_scale(self,x, logdet, reverse ):
+    def apply_scale(self, x, logdet, reverse):
         if not reverse:
             n,c,h,w = x.size()
             x = x * torch.exp(self.logs)

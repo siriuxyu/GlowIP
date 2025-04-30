@@ -49,7 +49,7 @@ class CouplingLayer(nn.Module):
                     s.mean().item(), x.mean().item(), xa.mean().item(), ya.mean().item(), t.mean().item())
                 return y, logdet
             # additive coupling layer
-            if self.coupling == "additive":
+            elif self.coupling == "additive":
                 xa, xb = self.split(x, mode="split-by-chunk")
                 t = self.net(xb)
                 ya = xa + t
@@ -81,7 +81,7 @@ class CouplingLayer(nn.Module):
                     s.mean().item(), x.mean().item(), xa.mean().item(), ya.mean().item(), t.mean().item())
                 return y
             # additive coupling layer
-            if self.coupling == "additive":
+            elif self.coupling == "additive":
                 xa, xb = self.split(x, mode="split-by-chunk")
                 t = self.net(xb)
                 ya = (xa - t)

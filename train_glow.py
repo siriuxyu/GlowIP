@@ -11,10 +11,12 @@ import json
 import argparse
 import re
 from collections import defaultdict
+from npzdata import NPZDataset
 
 def trainGlow(args):
     save_path   = "./trained_models/%s/glow"%args.dataset
     training_folder = "./data/%s_preprocessed/train"%args.dataset
+    npz_folder     = "./data/%s_preprocessed/train.npz"%args.dataset # TODO
     
     # setting up configs as json
     config_path = save_path+"/configs.json"
@@ -67,7 +69,8 @@ def trainGlow(args):
     trans      = transforms.Compose([transforms.Resize(args.size),
                                      transforms.CenterCrop((args.size, args.size)),
                                      transforms.ToTensor()])
-    dataset    = datasets.ImageFolder(training_folder, transform=trans)
+    # dataset    = datasets.ImageFolder(training_folder, transform=trans)
+    dataset    = NPZDataset(npz_folder)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batchsize,
                                                 drop_last=True, shuffle=True)
     
