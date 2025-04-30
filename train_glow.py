@@ -44,7 +44,7 @@ def trainGlow(args):
         print("loading previous model and saved configs to resume training ...")
         with open(config_path, 'r') as f:
             configs = json.load(f)
-        glow = Glow((3,configs["size"],configs["size"]), device=args.device, **configs)
+        glow = Glow((1,configs["size"],configs["size"]), device=args.device, **configs)
         glow.load_state_dict(torch.load(save_path+"/glowmodel.pt"))
         print("pre-trained model and configs loaded successfully")
         glow.set_actnorm_init()
@@ -95,7 +95,7 @@ def trainGlow(args):
             opt.zero_grad()
             glow.zero_grad()
             # loading batch
-            x = data[0].to(device=args.device)*255
+            x = data.to(device=args.device)*255
             # pre-processing data
             x = glow.preprocess(x)
             # computing loss: "nll"
