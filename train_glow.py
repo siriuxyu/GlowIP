@@ -16,7 +16,7 @@ from npzdata import NPZDataset
 def trainGlow(args):
     save_path   = "./trained_models/%s/glow"%args.dataset
     training_folder = "./data/%s_preprocessed/train"%args.dataset
-    npz_folder     = "./data/%s_preprocessed/train.npz"%args.dataset # TODO
+    npz_folder     = "./data/test_data/%s.npz"%args.dataset     # TODO
     
     # setting up configs as json
     config_path = save_path+"/configs.json"

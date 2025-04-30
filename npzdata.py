@@ -23,7 +23,7 @@ class NPZDataset(Dataset):
 
     def __getitem__(self, idx):
         image = self.images[idx]
-        image = image.astype(np.float32) / 255.0  # 假设原始数据是 0-255
+        image = image.astype(np.float32) / 255.0
         return torch.from_numpy(image)
 
 def load_data(dataset):
