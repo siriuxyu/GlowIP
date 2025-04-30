@@ -54,7 +54,7 @@ def trainGlow(args):
     else:
         # creating and initializing glow model
         print("creating and initializing model for training")
-        glow = Glow((3,args.size,args.size),
+        glow = Glow((1,args.size,args.size),
                     K=args.K,L=args.L,coupling=args.coupling,n_bits_x=args.n_bits_x,
                     nn_init_last_zeros=args.last_zeros,
                     device=args.device)

@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 path_remote = "./data/test_data"
-path_local  = "/Users/siriux/Downloads/test_data"
+path_local  = "/Users/siriux/Downloads/mri_test_data/LDCT.npz"
 
 data_path = path_remote if os.path.exists(path_remote) else path_local
 
@@ -40,10 +40,17 @@ def load_data(dataset):
 
     
 if __name__ == "__main__":
-    data = load_data("LDCT")
-    print(data['all_imgs'].shape)
-    single_slice_0 = data['all_imgs'][1]
-    single_slice_1 = data['all_imgs'][2]
-    plt.imsave("test0.png", single_slice_0, cmap='gray')
-    plt.imsave("test1.png", single_slice_1, cmap='gray')
+    # data = load_data("LDCT")
+    # print(data['all_imgs'].shape)
+    # single_slice_0 = data['all_imgs'][1]
+    # single_slice_1 = data['all_imgs'][2]
+    # plt.imsave("test0.png", single_slice_0, cmap='gray')
+    # plt.imsave("test1.png", single_slice_1, cmap='gray')
     
+    dataset    = NPZDataset(path_local)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=100,
+                                                drop_last=True, shuffle=True)
+    for j, data in enumerate(dataloader):
+            # loading batch
+            x = data * 255.0
+            print(x.shape)
