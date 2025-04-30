@@ -197,6 +197,17 @@ if __name__ == "__main__":
     parser.add_argument('-squeeze_contig', action="store_true", help="whether to select contiguous components of activations in each squeeze layer")
     parser.add_argument('-device',type=str,help='whether to use',default="cuda")    
     args = parser.parse_args()
+    # Try to initialize CUDA, fallback to CPU if fails
+    if args.device == "cuda":
+        try:
+            if not torch.cuda.is_available():
+                raise RuntimeError("CUDA not available")
+            # force trigger device count to check CUDA runtime
+            torch.cuda.device_count()
+        except Exception as e:
+            print("WARNING: CUDA initialization failed, fallback to CPU.")
+            print(f"Details: {e}")
+            args.device = "cpu"
     trainGlow(args)
     
 
