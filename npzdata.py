@@ -24,7 +24,8 @@ class NPZDataset(Dataset):
     def __getitem__(self, idx):
         image = self.images[idx]
         image = image.astype(np.float32) / 255.0
-        return torch.from_numpy(image)
+        image = np.expand_dims(image, axis=0)  # shape: (1, height, width)
+    return torch.from_numpy(image)
 
 def load_data(dataset):
     """
