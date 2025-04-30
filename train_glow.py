@@ -11,7 +11,7 @@ import json
 import argparse
 import re
 from collections import defaultdict
-from npzdata import NPZDataset
+from data.npzdata import NPZDataset
 
 def trainGlow(args):
     save_path   = "./trained_models/%s/glow"%args.dataset
