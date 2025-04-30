@@ -3,8 +3,8 @@
 #BSUB -q gpuq
 #BSUB -n 4
 #BSUB -R "select[ngpus>0]rusage [ngpus_shared=2]"
-#BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/output_1.txt
-#BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/errput_1.txt
+#BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/output_solve.txt
+#BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/errput_solve.txt
 
 export PATH=/gpfsdata/home/Zhaobo_hengjia21/anaconda3/bin:$PATH
 export PATH=/gpfsdata/home/Zhaobo_hengjia21/anaconda3/envs/gpu122/bin:$PATH
@@ -20,4 +20,5 @@ conda activate gpu122
 
 
 python solve_cs.py -experiment exp1 -dataset celeba -prior glow -model celeba -m 12288 \
--lr 0.05 -gamma 0 -init_std 0 -batchsize 1 -steps 50 -device cuda >> cs_log_1.txt
+-lr 0.05 -gamma 0 -init_std 0 -batchsize 1 -steps 50 -device cuda >> solve_log_cs.txt
+
