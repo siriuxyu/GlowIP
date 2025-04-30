@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import Dataset, DataLoader
 
-path_remote = "./data/test_data"
+path_remote = "./data/mri"
 path_local  = "/Users/siriux/Downloads/mri_test_data/LDCT.npz"
 
 data_path = path_remote if os.path.exists(path_remote) else path_local

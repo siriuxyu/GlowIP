@@ -43,14 +43,14 @@ def GlowCS(args):
 
     for m, gamma, init_norm in loopOver:
         skip_to_next = False # flag to skip to next loop if recovery is fails due to instability
-        n                  = args.size*args.size*3
+        n                  = args.size*args.size*1      # 1 channel for MRI
         modeldir           = "./trained_models/%s/glow"%args.model
-        test_folder        = "./test_images/%s"%args.dataset
-        npz_folder         = "./test_images/%s.npz"%args.dataset
+        # test_folder        = "./test_images/%s"%args.dataset
+        npz_folder         = "./data/mri/%s.npz"%args.dataset
         save_path          = "./results/%s/%s"%(args.dataset,args.experiment)
 
         # loading dataset
-        trans           = transforms.Compose([transforms.Resize((args.size,args.size)),transforms.ToTensor()])
+        # trans           = transforms.Compose([transforms.Resize((args.size,args.size)),transforms.ToTensor()])
         # test_dataset    = datasets.ImageFolder(test_folder, transform=trans)
         test_dataset    = NPZDataset(npz_folder)
         test_dataloader = torch.utils.data.DataLoader(test_dataset,batch_size=args.batchsize,drop_last=True,shuffle=False)
@@ -80,13 +80,13 @@ def GlowCS(args):
         # start solving over batches
         Original = []; Recovered = []; Z_Recovered = []; Residual_Curve = []; Recorded_Z = []
         for i, data in enumerate(test_dataloader):
-            x_test = data[0]
+            x_test = data   # x_test = data[0] for other datasets (besides npz)
             x_test = x_test.clone().to(device=args.device)
             n_test = x_test.size()[0]
             assert n_test == args.batchsize, "please make sure that no. of images are evenly divided by batchsize"
             
             # loading glow model
-            glow = Glow((3,args.size,args.size),
+            glow = Glow((1,args.size,args.size),    # 1 channel for MRI
                         K=configs["K"],L=configs["L"],
                         coupling=configs["coupling"],
                         n_bits_x=configs["n_bits_x"],
@@ -614,6 +614,6 @@ class NPZDataset(Dataset):
 
     def __getitem__(self, idx):
         image = self.images[idx]
-        image = image.astype(np.float32) / 255.0
+        image = image.astype(np.float32) / 255.0  # Normalize to [0, 1]
         image = np.expand_dims(image, axis=0)  # shape: (1, height, width)
         return torch.from_numpy(image)
