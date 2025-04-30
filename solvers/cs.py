@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from torchvision import datasets
 import torchvision.transforms as transforms
+from torch.utils.data import Dataset
 import matplotlib.pyplot as plt
 # from skimage.measure import compare_psnr, compare_ssim
 from skimage.metrics import peak_signal_noise_ratio as compare_psnr
@@ -45,11 +46,13 @@ def GlowCS(args):
         n                  = args.size*args.size*3
         modeldir           = "./trained_models/%s/glow"%args.model
         test_folder        = "./test_images/%s"%args.dataset
+        npz_folder         = "./test_images/%s.npz"%args.dataset
         save_path          = "./results/%s/%s"%(args.dataset,args.experiment)
 
         # loading dataset
         trans           = transforms.Compose([transforms.Resize((args.size,args.size)),transforms.ToTensor()])
-        test_dataset    = datasets.ImageFolder(test_folder, transform=trans)
+        # test_dataset    = datasets.ImageFolder(test_folder, transform=trans)
+        test_dataset    = NPZDataset(npz_folder)
         test_dataloader = torch.utils.data.DataLoader(test_dataset,batch_size=args.batchsize,drop_last=True,shuffle=False)
         
         # loading glow configurations
@@ -599,3 +602,18 @@ def DCTCS(args):
             #            _ = [sio.imsave(save_path+"/"+name.split(".")[0]+".jpg", x, quality=100) for x,name in zip(x_hat,file_names)]
             np.save(save_path + "/original.npy", x_test)
             np.save(save_path + "/recovered.npy", x_hat)
+
+class NPZDataset(Dataset):
+    def __init__(self, npz_file_path):
+        data = np.load(npz_file_path)
+        self.images = data['all_imgs']
+        self.length = len(self.images)
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, idx):
+        image = self.images[idx]
+        image = image.astype(np.float32) / 255.0
+        image = np.expand_dims(image, axis=0)  # shape: (1, height, width)
+        return torch.from_numpy(image)
