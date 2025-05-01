@@ -13,7 +13,7 @@ rm -f errput_"$mode".txt
 rm -f "${mode}_log.txt"
 
 # Submit the job
-bsub < job_"$mode".sh
+bsub < scripts/job_"$mode".sh
 
 # Check bjobs status every 2 seconds
 watch -n 2 bjobs

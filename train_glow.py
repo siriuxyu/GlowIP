@@ -204,6 +204,8 @@ if __name__ == "__main__":
                 raise RuntimeError("CUDA not available")
             # force trigger device count to check CUDA runtime
             torch.cuda.device_count()
+            print("CUDA initialized successfully.")
+            print(f"Using device: {args.device}, GPU count: {torch.cuda.device_count()}")
         except Exception as e:
             print("WARNING: CUDA initialization failed, fallback to CPU.")
             print(f"Details: {e}")
