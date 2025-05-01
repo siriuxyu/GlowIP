@@ -19,5 +19,5 @@ source ~/anaconda3/etc/profile.d/conda.sh
 conda activate gpu122
 
 
-python train_glow.py -dataset BraTS >> train_log.txt
+python train_glow.py -batchsize 1 -dataset BraTS >> train_log.txt
  

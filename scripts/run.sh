@@ -8,8 +8,8 @@ fi
 mode="$1"
 
 # Remove corresponding output files
-rm -f output_"$mode".txt
-rm -f errput_"$mode".txt
+rm -f results/output_"$mode".txt
+rm -f results/errput_"$mode".txt
 rm -f "${mode}_log.txt"
 
 # Submit the job
