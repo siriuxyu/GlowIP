@@ -44,7 +44,12 @@ def trainGlow(args):
         print("loading previous model and saved configs to resume training ...")
         with open(config_path, 'r') as f:
             configs = json.load(f)
-        glow = Glow((1,configs["size"],configs["size"]), device=args.device, **configs)
+        glow = Glow((1,configs["size"],configs["size"]), device=args.device, 
+                    K=configs["K"], L=configs["L"], coupling=configs["coupling"],
+                    n_bits_x=configs["n_bits_x"], nn_init_last_zeros=configs["last_zeros"],
+                    coupling_bias=configs.get("coupling_bias", 0),
+                    squeeze_contig=configs.get("squeeze_contig", False),
+                    )
         glow.load_state_dict(torch.load(save_path+"/glowmodel.pt"))
         print("pre-trained model and configs loaded successfully")
         glow.set_actnorm_init()
