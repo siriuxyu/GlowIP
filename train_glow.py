@@ -75,7 +75,7 @@ def trainGlow(args):
                                      transforms.CenterCrop((args.size, args.size)),
                                      transforms.ToTensor()])
     # dataset    = datasets.ImageFolder(training_folder, transform=trans)
-    dataset    = NPZDataset(npz_folder)
+    dataset    = NPZDataset(npz_folder, size=args.size)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batchsize,
                                                 drop_last=True, shuffle=True)
     
