@@ -1,20 +1,33 @@
 #!/bin/sh
 
-if [ $# -lt 1 ]; then
-  echo "Usage: $0 <mode>"
+# Check arguments
+if [ $# -lt 2 ]; then
+  echo "Usage: $0 <mode> <job_id>"
   exit 1
 fi
 
 mode="$1"
+job_id="$2"
 
-# Remove corresponding output files
-rm -f results/output_"$mode".txt
-rm -f results/errput_"$mode".txt
-rm -f "${mode}_log.txt"
+# Compose identifiers
+job_name="${mode}_${job_id}"
+job_script="scripts/job_${mode}.sh"
+output_file="results/output_${job_name}.txt"
+error_file="results/errput_${job_name}.txt"
+log_file="${job_name}_log.txt"
+
+# Check if the job script exists
+if [ ! -f "$job_script" ]; then
+  echo "Job script '$job_script' not found!"
+  exit 1
+fi
+
+# Remove previous logs
+rm -f "$output_file" "$error_file" "$log_file"
 
 # Submit the job
-bsub < scripts/job_"$mode".sh
+bsub < "$job_script"
 
-# Check bjobs status every 2 seconds
+# Monitor job status
 watch -n 2 bjobs
 

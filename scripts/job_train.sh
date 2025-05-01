@@ -19,5 +19,5 @@ source ~/anaconda3/etc/profile.d/conda.sh
 conda activate gpu122
 
 
-python train_glow.py -batchsize 3 -dataset LDTC >> train_log_LDTC.txt
+python train_glow.py -batchsize 3 -dataset LDCT >> train_log_LDTC.txt
  
