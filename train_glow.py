@@ -14,9 +14,9 @@ from collections import defaultdict
 from data.npzdata import NPZDataset
 
 def trainGlow(args):
-    save_path   = "./trained_models/%s/glow"%args.dataset
-    training_folder = "./data/%s_preprocessed/train"%args.dataset
-    npz_folder     = "./data/test_data/%s.npz"%args.dataset     # TODO
+    save_path   = f"./trained_models/{args.dataset}/glow_{args.size}/"
+    training_folder = f"./data/{args.dataset}_preprocessed/train/"
+    npz_file     = f"./data/test_data/{args.dataset}.npz"
     
     # setting up configs as json
     config_path = save_path+"/configs.json"
@@ -40,7 +40,8 @@ def trainGlow(args):
     
     
     # loading pre-trained model to resume training
-    if os.path.exists(save_path+"/glowmodel.pt"):
+    model_path = save_path + "glowmodel.pt"
+    if os.path.exists(model_path):
         print("loading previous model and saved configs to resume training ...")
         with open(config_path, 'r') as f:
             configs = json.load(f)
@@ -50,7 +51,7 @@ def trainGlow(args):
                     coupling_bias=configs.get("coupling_bias", 0),
                     squeeze_contig=configs.get("squeeze_contig", False),
                     )
-        glow.load_state_dict(torch.load(save_path+"/glowmodel.pt"))
+        glow.load_state_dict(torch.load(model_path))
         print("pre-trained model and configs loaded successfully")
         glow.set_actnorm_init()
         print("actnorm initialization flag set to True to avoid data dependant re-initialization")
@@ -75,7 +76,7 @@ def trainGlow(args):
                                      transforms.CenterCrop((args.size, args.size)),
                                      transforms.ToTensor()])
     # dataset    = datasets.ImageFolder(training_folder, transform=trans)
-    dataset    = NPZDataset(npz_folder, size=args.size)
+    dataset    = NPZDataset(npz_file, size=args.size)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batchsize,
                                                 drop_last=True, shuffle=True)
     
@@ -158,7 +159,7 @@ def trainGlow(args):
             global_step = global_step + 1
             global_loss.append(nll.item())
             if global_step % args.save_freq == 0:
-                torch.save(glow.state_dict(), save_path+"/glowmodel.pt")
+                torch.save(glow.state_dict(), model_path)
         
 #    # model visualization 
 #    temperature = [0.1,0.3,0.4,0.5,0.7,0.8, 0.9]
@@ -179,7 +180,7 @@ def trainGlow(args):
 #            plt.imshow(x_gen)
             
     # saving model weights
-    torch.save(glow.state_dict(), save_path+"/glowmodel.pt")    
+    torch.save(glow.state_dict(), model_path)    
 
 
 if __name__ == "__main__":
