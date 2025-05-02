@@ -4,11 +4,10 @@ f [ $# -lt 2 ]; then
 fi
 
 mode="$1"
-job_id="$2"
-dataset="$3"
-batchsize="$4"
-size="$5"
-job_name="${mode}_${job_id}"
+dataset="$2"
+batchsize="$3"
+size="$4"
+job_name="${mode}_${dataset}_${size}"
 
 output_file="results/output_${job_name}.txt"
 error_file="results/errput_${job_name}.txt"
