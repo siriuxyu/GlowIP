@@ -86,7 +86,6 @@ def trainGlow(args):
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(opt,mode="min",
                                                               factor=0.5,
                                                               patience=1000,
-                                                              verbose=True,
                                                               min_lr=1e-8)
     
     # starting training code here
