@@ -77,6 +77,7 @@ def trainGlow(args):
                                      transforms.ToTensor()])
     # dataset    = datasets.ImageFolder(training_folder, transform=trans)
     dataset    = NPZDataset(npz_file, size=args.size)
+    dataset.sample_images(200)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batchsize,
                                                 drop_last=True, shuffle=True)
     

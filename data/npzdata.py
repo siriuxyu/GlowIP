@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import Dataset, DataLoader
 import cv2
+import argparse
 
 path_remote = "./data/mri"
 path_local  = "/Users/siriux/Downloads/mri_test_data/LDCT.npz"
@@ -38,6 +39,22 @@ class NPZDataset(Dataset):
 
         return torch.from_numpy(img_resized / 255.0).float()
 
+    def sample_images(self, num_samples=1000):
+        """
+        Randomly sample a specified number of images from the dataset.
+        """
+        if num_samples <= 0:
+            raise ValueError("num_samples must be a positive integer.")
+        elif num_samples > self.length:
+            num_samples = self.length
+            return
+        else:
+            indices = np.random.choice(self.length, num_samples, replace=False)
+            sampled_images = self.images[indices]
+            self.images = sampled_images
+            self.length = num_samples
+
+
 def load_data(dataset):
     """
     Load data from the specified dataset directory.
@@ -51,12 +68,9 @@ def load_data(dataset):
 
     
 if __name__ == "__main__":
-    # data = load_data("LDCT")
-    # print(data['all_imgs'].shape)
-    # single_slice_0 = data['all_imgs'][1]
-    # single_slice_1 = data['all_imgs'][2]
-    # plt.imsave("test0.png", single_slice_0, cmap='gray')
-    # plt.imsave("test1.png", single_slice_1, cmap='gray')
+    parser = argparse.ArgumentParser(description='preprocess npz data')
+    parser.add_argument('-dataset', type=str, help='the dataset/images to use', default='LDCT')
+    parser.add_argument('-size', type=int, help='use first {size} numbers of imgs', default=1000)
     
     dataset    = NPZDataset(path_local)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=100,
