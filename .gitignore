@@ -4,3 +4,12 @@ __pycache__/
 *.zip
 *.egg-info/
 *.egg
+scripts/*temp.sh
+data/celeba/
+data/celeba_preprocessed/
+data/mri
+data/test_data
+results/errput*
+results/output*
+
+

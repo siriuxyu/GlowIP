@@ -1,5 +1,5 @@
-f [ $# -lt 2 ]; then
-  echo "Usage: $0 <mode> <job_id>"
+if [ $# -lt 4 ]; then
+  echo "Usage: $0 <mode> <dataset> <batchsize> <size>"
   exit 1
 fi
 
@@ -15,8 +15,9 @@ log_file="results/${job_name}_log.txt"
 script_template="scripts/job_template.sh"
 temp_script="scripts/job_${job_name}_temp.sh"
 
-# Substitute 
-sed "s/{SIZE}/${size}/g; s/{BATCHSIZE}/${batchsize}/g; s/{JOBNAME}/${job_name}/g; s/{DATASET}/${datasize}/g; s/{LOGFILE}/${log_file}/g" "$script_template" > "$temp_script"
+
+# Substitute placeholders in the job template
+sed "s#{SIZE}#${size}#g; s#{BATCHSIZE}#${batchsize}#g; s#{JOBNAME}#${job_name}#g; s#{DATASET}#${dataset}#g; s#{LOGFILE}#${log_file}#g" "$script_template" > "$temp_script"
 
 # Remove old logs
 rm -f "$output_file" "$error_file" "$log_file"
