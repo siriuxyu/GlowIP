@@ -103,6 +103,9 @@ def trainGlow(args):
                                                               patience=1000,
                                                               min_lr=1e-8)
     
+    # extract module from DataParallel if used
+    core_glow = glow.module if isinstance(glow, torch.nn.DataParallel) else glow
+    
     # starting training code here
     print("+-"*10,"starting training","-+"*10)
     global_step = 0
@@ -112,22 +115,22 @@ def trainGlow(args):
         Loss_epoch = []
         for j, data in enumerate(dataloader):
             opt.zero_grad()
-            glow.zero_grad()
+            core_glow.zero_grad()
             # loading batch
             x = data.to(device=args.device)*255
             # pre-processing data
-            x = glow.preprocess(x)
+            x = core_glow.preprocess(x)
             # computing loss: "nll"
             n,c,h,w = x.size()
-            nll,logdet,logpz,z_mu,z_std = glow.nll_loss(x)
+            nll,logdet,logpz,z_mu,z_std = core_glow.nll_loss(x)
             # skipping first batch due to data dependant initialization (if not initialized)
             if global_step == 0:
                 global_step += 1
                 continue
             # backpropogating loss and gradient clipping
             nll.backward()
-            torch.nn.utils.clip_grad_value_(glow.parameters(), 5)
-            grad_norm = torch.nn.utils.clip_grad_norm_(glow.parameters(), 100)
+            torch.nn.utils.clip_grad_value_(core_glow.parameters(), 5)
+            grad_norm = torch.nn.utils.clip_grad_norm_(core_glow.parameters(), 100)
             # linearly increase learning rate till warmup_iter upto args.lr
             if global_step <= args.warmup_iter:
                 warmup_lr = args.lr / args.warmup_iter * global_step
@@ -156,9 +159,9 @@ def trainGlow(args):
                     plt.savefig(save_path+"/nll_training_curve.jpg")
                     plt.close()
                     with torch.no_grad():
-                        z_sample, z_sample_t = glow.generate_z(n=10,mu=0,std=0.7,to_torch=True)
+                        z_sample, z_sample_t = core_glow.generate_z(n=10,mu=0,std=0.7,to_torch=True)
                         x_gen = glow(z_sample_t, reverse=True)
-                        x_gen = glow.postprocess(x_gen)
+                        x_gen = core_glow.postprocess(x_gen)
                         x_gen = make_grid(x_gen,nrow=int(np.sqrt(len(x_gen))))
                         x_gen = x_gen.data.cpu().numpy()
                         x_gen = x_gen.transpose([1,2,0])
@@ -173,7 +176,7 @@ def trainGlow(args):
             global_step = global_step + 1
             global_loss.append(nll.item())
             if global_step % args.save_freq == 0:
-                torch.save(glow.state_dict(), model_path)
+                torch.save(core_glow.state_dict(), model_path)
         
 #    # model visualization 
 #    temperature = [0.1,0.3,0.4,0.5,0.7,0.8, 0.9]
@@ -194,7 +197,7 @@ def trainGlow(args):
 #            plt.imshow(x_gen)
             
     # saving model weights
-    torch.save(glow.module.state_dict() if isinstance(glow, torch.nn.DataParallel) else glow.state_dict(), model_path)
+    torch.save(core_glow.state_dict, model_path)
 
     # torch.save(glow.state_dict(), model_path)    
 
