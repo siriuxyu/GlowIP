@@ -29,7 +29,7 @@ class InvertibleConvolution(nn.Module):
         n, c, h, w = x.size()
         if not reverse:
             x = F.conv2d(x, self.W)
-            detW = torch.slogdet(self.W.squeeze())[1]
+            detW = torch.slogdet(self.W.squeeze().contiguous().clone())[1]
             logdet = logdet + h * w * detW
             return x, logdet
 
