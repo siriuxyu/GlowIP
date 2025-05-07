@@ -97,7 +97,8 @@ def trainGlow(args):
     
     
     # setting up optimizer and learning rate scheduler
-    opt          = torch.optim.Adam(glow.parameters(), lr=args.lr)
+    lr_adjusted = args.lr * (64/args.size)**2 * (args.batchsize/4)
+    opt          = torch.optim.Adam(glow.parameters(), lr=lr_adjusted)
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(opt,mode="min",
                                                               factor=0.5,
                                                               patience=1000,
@@ -211,7 +212,7 @@ if __name__ == "__main__":
     parser.add_argument('-last_zeros',type=bool,help='whether to initialize last layer ot NN with zeros',default=True)
     parser.add_argument('-batchsize',type=int,help='batch size for training',default=3)
     parser.add_argument('-size',type=int,help='images will be resized to this dimension',default=64)
-    parser.add_argument('-lr',type=float,help='learning rate for training',default=1e-5)
+    parser.add_argument('-lr',type=float,help='learning rate for training',default=1e-4)
     parser.add_argument('-n_bits_x',type=int,help='requantization of training images',default=5)
     parser.add_argument('-epochs',type=int,help='epochs to train for',default=1000)
     parser.add_argument('-warmup_iter',type=int,help='no. of warmup iterations',default=10000)
