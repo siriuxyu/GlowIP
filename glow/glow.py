@@ -72,6 +72,8 @@ class Glow(nn.Module):
                     Z.append(z)
                 else:   
                     raise "Unknown Layer"
+                
+            
             # for i in range( len(self.glow_modules) ):
             #     module_name = self.glow_modules[i].__class__.__name__
             #     if  module_name == "Squeeze":
@@ -89,7 +91,19 @@ class Glow(nn.Module):
             if not self.init_resizer:
                 self.sizes = [t.size() for t in Z]
                 self.init_resizer = True
-            return Z, logdet, actloss
+                
+            # Compute NLL Loss inside forward
+            z_ = [z_i.view(n, -1) for z_i in Z]
+            z_ = torch.cat(z_, dim=1)
+            mean = 0.0
+            logs = 0.0
+            logdet += float(-np.log(256.) * h * w * c)
+            logpz = -0.5 * (logs * 2. + ((z_ - mean)**2) / np.exp(logs * 2.) + float(np.log(2 * np.pi))).sum(-1)
+            nll = -(logdet + logpz).mean()
+            nll = nll / float(np.log(2.) * h * w * c)
+
+            return nll, -logdet.mean().item(), -logpz.mean().item(), z_.mean().item(), z_.std().item()
+            # return Z, logdet, actloss
         
         if reverse:
             if reverse_clone:
@@ -124,7 +138,7 @@ class Glow(nn.Module):
         logpz  =  -0.5*(logs*2. + ((z_- mean)**2)/np.exp(logs*2.) + float(np.log(2 * np.pi))).sum(-1)
         nll    =  -(logdet + logpz).mean()
         nll    =  nll / float(np.log(2.)*h*w*c)
-        return nll, -logdet.mean().item(),-logpz.mean().item(), z_.mean().item(), z_.std().item()
+        return nll, -logdet.mean().item(), -logpz.mean().item(), z_.mean().item(), z_.std().item()
     
     def preprocess(self, x, clone=False):
         if clone:
