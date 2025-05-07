@@ -2,6 +2,7 @@
 #BSUB -J LDTC
 #BSUB -q gpuq
 #BSUB -n 4
+#BSUB -m gpu05
 #BSUB -R "select[ngpus>0]rusage [ngpus_shared=2]"
 #BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/output_train_LIDC_320.txt
 #BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/errput_train_LIDC_320.txt
