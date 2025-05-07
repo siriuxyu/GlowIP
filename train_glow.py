@@ -123,7 +123,7 @@ def trainGlow(args):
             x = core_glow.preprocess(x)
             # computing loss: "nll"
             n,c,h,w = x.size()
-            nll,logdet,logpz,z_mu,z_std = core_glow.nll_loss(x)
+            nll,logdet,logpz,z_mu,z_std = glow.nll_loss(x)
             # skipping first batch due to data dependant initialization (if not initialized)
             if global_step == 0:
                 global_step += 1
