@@ -2,7 +2,7 @@
 #BSUB -J {JOBNAME}
 #BSUB -q gpuq
 #BSUB -n 4
-#BSUB -R "select[ngpus>0]rusage [ngpus_excl_p=1]"
+#BSUB -R "select[ngpus>0]rusage [ngpus_shared=1]"
 #BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/output_{JOBNAME}.txt
 #BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/errput_{JOBNAME}.txt
 

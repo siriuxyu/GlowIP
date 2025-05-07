@@ -45,6 +45,9 @@ def trainGlow(args):
         print("loading previous model and saved configs to resume training ...")
         with open(config_path, 'r') as f:
             configs = json.load(f)
+            glow = Glow(...)  # 初始化模型
+
+
         glow = Glow((1,configs["size"],configs["size"]), device=args.device, 
                     K=configs["K"], L=configs["L"], coupling=configs["coupling"],
                     n_bits_x=configs["n_bits_x"], nn_init_last_zeros=configs["last_zeros"],
@@ -52,6 +55,10 @@ def trainGlow(args):
                     squeeze_contig=configs.get("squeeze_contig", False),
                     )
         glow.load_state_dict(torch.load(model_path))
+        if torch.cuda.device_count() > 1:
+            print(f"Using {torch.cuda.device_count()} GPUs")
+            glow = torch.nn.DataParallel(glow)
+
         print("pre-trained model and configs loaded successfully")
         glow.set_actnorm_init()
         print("actnorm initialization flag set to True to avoid data dependant re-initialization")
@@ -65,6 +72,12 @@ def trainGlow(args):
                     nn_init_last_zeros=args.last_zeros,
                     device=args.device)
         glow.train()
+        
+        # Multi-GPU support
+        if torch.cuda.device_count() > 1:
+            print(f"Using {torch.cuda.device_count()} GPUs")
+            glow = torch.nn.DataParallel(glow)
+        
         print("saving configs as json file")
         with open(config_path, 'w') as f:
             json.dump(configs, f, sort_keys=True, indent=4, ensure_ascii=False)
@@ -181,7 +194,9 @@ def trainGlow(args):
 #            plt.imshow(x_gen)
             
     # saving model weights
-    torch.save(glow.state_dict(), model_path)    
+    torch.save(glow.module.state_dict() if isinstance(glow, torch.nn.DataParallel) else glow.state_dict(), model_path)
+
+    # torch.save(glow.state_dict(), model_path)    
 
 
 if __name__ == "__main__":
