@@ -17,6 +17,7 @@ datasets = ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]
 class NPZDataset(Dataset):
     def __init__(self, npz_file_path, size=64):
         data = np.load(npz_file_path)
+        self.path = npz_file_path
         self.images = data['all_imgs']
         self.length = len(self.images)
         self.size = size
@@ -53,6 +54,23 @@ class NPZDataset(Dataset):
             sampled_images = self.images[indices]
             self.images = sampled_images
             self.length = num_samples
+            
+    def split_data(self, train_ratio=0.8):
+        """
+        Split the dataset into training and testing sets.
+        """
+        if not (0 < train_ratio < 1):
+            raise ValueError("train_ratio must be between 0 and 1.")
+        
+        split_index = int(self.length * train_ratio)
+        train_data = self.images[:split_index]
+        test_data = self.images[split_index:]
+        
+        # Save the split data
+        np.savez_compressed(os.path.join(self.path, 'train_data.npz'), train_data=train_data)
+        np.savez_compressed(os.path.join(self.path, 'test_data.npz'), test_data=test_data)
+        return train_data, test_data
+
 
 
 def load_data(dataset):
