@@ -2,7 +2,6 @@
 #BSUB -J {JOBNAME}
 #BSUB -q gpuq
 #BSUB -n 10
-#BSUB -m gpu01
 #BSUB -R "select[ngpus>=1] rusage[ngpus_shared=2]"
 #BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/output_{JOBNAME}.txt
 #BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/errput_{JOBNAME}.txt

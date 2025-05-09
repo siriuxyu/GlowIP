@@ -213,7 +213,7 @@ if __name__ == "__main__":
     parser.add_argument('-last_zeros',type=bool,help='whether to initialize last layer ot NN with zeros',default=True)
     parser.add_argument('-batchsize',type=int,help='batch size for training',default=3)
     parser.add_argument('-size',type=int,help='images will be resized to this dimension',default=64)
-    parser.add_argument('-lr',type=float,help='learning rate for training',default=1e-4)
+    parser.add_argument('-lr',type=float,help='learning rate for training',default=1e-5)
     parser.add_argument('-n_bits_x',type=int,help='requantization of training images',default=5)
     parser.add_argument('-epochs',type=int,help='epochs to train for',default=1000)
     parser.add_argument('-warmup_iter',type=int,help='no. of warmup iterations',default=10000)
