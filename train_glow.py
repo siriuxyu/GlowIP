@@ -14,7 +14,7 @@ from collections import defaultdict
 from data.npzdata import NPZDataset
 
 def trainGlow(args):
-    save_path   = f"./trained_models/{args.dataset}/glow_{args.size}_1/"
+    save_path   = f"./trained_models/{args.dataset}/glow_{args.size}_{args.job_id}/"
     training_folder = f"./data/{args.dataset}_preprocessed/train/"
     npz_file     = f"./data/test_data/{args.dataset}/{args.dataset}_train.npz"
     
@@ -221,7 +221,8 @@ if __name__ == "__main__":
     parser.add_argument('-save_freq',type=int,help='save after every save_freq',default=1000)
     parser.add_argument('-coupling_bias', type=float,help='additive bias to the scale parameter of each affine coupling layer to prevent division by eps', default=0)
     parser.add_argument('-squeeze_contig', action="store_true", help="whether to select contiguous components of activations in each squeeze layer")
-    parser.add_argument('-device',type=str,help='whether to use',default="cuda")    
+    parser.add_argument('-device',type=str,help='whether to use',default="cuda")  
+    parser.add_argument('-job_id', type=str, help='job id to save the model', default="0")  
     args = parser.parse_args()
     # Try to initialize CUDA, fallback to CPU if fails
     if args.device == "cuda":

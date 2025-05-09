@@ -16,5 +16,5 @@ cd /gpfsdata/home/Zhaobo_hengjia21/GlowIP
 source ~/anaconda3/etc/profile.d/conda.sh
 conda activate gpu122
 
-python train_glow.py -batchsize {BATCHSIZE} -dataset {DATASET} -size {SIZE} >> {LOGFILE}
+python train_glow.py -batchsize {BATCHSIZE} -dataset {DATASET} -size {SIZE} -job_id {JOBID} >> {LOGFILE}
 

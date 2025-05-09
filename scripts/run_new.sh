@@ -18,7 +18,7 @@ temp_script="scripts/job_${job_name}_temp.sh"
 
 
 # Substitute placeholders in the job template
-sed "s#{SIZE}#${size}#g; s#{BATCHSIZE}#${batchsize}#g; s#{JOBNAME}#${job_name}#g; s#{DATASET}#${dataset}#g; s#{LOGFILE}#${log_file}#g" "$script_template" > "$temp_script"
+sed "s#{SIZE}#${size}#g; s#{BATCHSIZE}#${batchsize}#g; s#{JOBNAME}#${job_name}#g; s#{DATASET}#${dataset}#g; s#{LOGFILE}#${log_file}#g; s#{JOBID}#${job_id}#g" "$script_template" > "$temp_script"
 
 # Remove old logs
 rm -f "$output_file" "$error_file" "$log_file"
