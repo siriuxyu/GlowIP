@@ -10,9 +10,9 @@ size="$4"
 job_id="$5"
 job_name="${mode}_${dataset}_${size}_${job_id}"
 
-output_file="results/output_${job_name}_${job_id}.txt"
-error_file="results/errput_${job_name}_${job_id}.txt"
-log_file="results/${job_name}_${job_id}_log.txt"
+output_file="results/output_${job_name}.txt"
+error_file="results/errput_${job_name}.txt"
+log_file="results/${job_name}_log.txt"
 script_template="scripts/job_template.sh"
 temp_script="scripts/job_${job_name}_temp.sh"
 
