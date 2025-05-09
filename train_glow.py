@@ -14,9 +14,9 @@ from collections import defaultdict
 from data.npzdata import NPZDataset
 
 def trainGlow(args):
-    save_path   = f"./trained_models/{args.dataset}/glow_{args.size}/"
+    save_path   = f"./trained_models/{args.dataset}/glow_{args.size}_1/"
     training_folder = f"./data/{args.dataset}_preprocessed/train/"
-    npz_file     = f"./data/test_data/{args.dataset}.npz"
+    npz_file     = f"./data/test_data/{args.dataset}/{args.dataset}_train.npz"
     
     # setting up configs as json
     config_path = save_path+"/configs.json"
