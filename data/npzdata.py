@@ -90,6 +90,6 @@ if __name__ == "__main__":
             os.makedirs(save_path)
         # copy from path to save_path
         os.system(f"cp {path} {save_path}")
-        npz = NPZDataset(save_path + f'{dataset}.npz')
+        split_data(dataset, save_path)
         
         
