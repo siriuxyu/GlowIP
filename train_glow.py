@@ -38,6 +38,7 @@ def trainGlow(args):
         print("creating directory to save model weights")
         os.makedirs(save_path)
     
+    _ = torch.inverse(torch.ones((1, 1), device="cuda:0"))  # init linear algebra to avoid lazy wrapper errors
     
     # loading pre-trained model to resume training
     model_path = save_path + "glowmodel.pt"
@@ -45,7 +46,7 @@ def trainGlow(args):
         print("loading previous model and saved configs to resume training ...")
         with open(config_path, 'r') as f:
             configs = json.load(f)
-            glow = Glow(...)  # 初始化模型
+            glow = Glow(...)  # init with the loaded configs
 
 
         glow = Glow((1,configs["size"],configs["size"]), device=args.device, 
@@ -85,12 +86,15 @@ def trainGlow(args):
     
     # setting up dataloader
     print("setting up dataloader for the training data")
-    trans      = transforms.Compose([transforms.Resize(args.size),
-                                     transforms.CenterCrop((args.size, args.size)),
-                                     transforms.ToTensor()])
-    # dataset    = datasets.ImageFolder(training_folder, transform=trans)
-    dataset    = NPZDataset(npz_file, size=args.size)
-    dataset.sample_images(1000)
+    if args.dataset == "celeba":
+        trans      = transforms.Compose([transforms.Resize(args.size),
+                                        transforms.CenterCrop((args.size, args.size)),
+                                        transforms.ToTensor()])
+        dataset    = datasets.ImageFolder(training_folder, transform=trans)
+    if args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]:
+        dataset    = NPZDataset(npz_file, size=args.size)
+        dataset.sample_images(1000)
+        
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batchsize,
                                                 drop_last=True, shuffle=True)
     
@@ -181,7 +185,7 @@ def trainGlow(args):
                 torch.save(core_glow.state_dict(), model_path)
         
 #    # model visualization 
-#    temperature = [0.1,0.3,0.4,0.5,0.7,0.8, 0.9]
+#    temperature = [0.1,0.3,0.4,0.5,0.7,0.8,0.9]
 #    for temp in temperature:
 #        with torch.no_grad():
 #            glow.eval()
@@ -207,8 +211,8 @@ def trainGlow(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train glow network')
     parser.add_argument('-dataset',type=str,help='the dataset to train the model on', default='celeba')
-    parser.add_argument('-K',type=int,help='no. of steps of flow',default=48)
-    parser.add_argument('-L',type=int,help='no. of time squeezing is performed',default=4)
+    parser.add_argument('-K',type=int,help='no. of steps of flow',default=32)
+    parser.add_argument('-L',type=int,help='no. of time squeezing is performed',default=6)
     parser.add_argument('-coupling',type=str,help='type of coupling layer to use',default='affine')
     parser.add_argument('-last_zeros',type=bool,help='whether to initialize last layer ot NN with zeros',default=True)
     parser.add_argument('-batchsize',type=int,help='batch size for training',default=3)

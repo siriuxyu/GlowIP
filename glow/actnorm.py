@@ -41,9 +41,10 @@ class ActNorm(nn.Module):
             return x
         
     def apply_scale(self, x, logdet, reverse):
+        epsilon = 0.0005
         if not reverse:
             n,c,h,w = x.size()
-            x = x * torch.exp(self.logs)
+            x = x * (torch.exp(self.logs) + epsilon)
             logdet = logdet + h*w*self.logs.view(-1).sum()
             assert not np.isnan(x.mean().item()), "nan after apply_scale in forward: x=%0.3f, logs=%0.3f"%(x.mean().item(), self.logs.mean().item())
             assert not np.isinf(x.mean().item()), "inf after apply_scale in forward: x=%0.3f, logs=%0.3f"%(x.mean().item(), self.logs.mean().item())
@@ -51,7 +52,7 @@ class ActNorm(nn.Module):
             assert not np.isinf(logdet.sum().item()), "inf in log after apply_scale in forward: logdet=%0.3f, logs=%0.3f"%(logdet.mean().item(), self.logs.mean().item())
             return x, logdet
         if reverse:
-            x = x * torch.exp(-1 * self.logs)
+            x = x * torch.exp(-1 * (self.logs + epsilon))
             return x
         
     def forward(self, x, logdet=None, reverse=False):
