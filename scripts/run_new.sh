@@ -11,6 +11,8 @@ nnode="$5"
 job_id="$6"
 job_name="${mode}_${dataset}_${size}_${job_id}"
 
+ngpus=$((nnode * 2))
+
 output_file="results/output_${job_name}.txt"
 error_file="results/errput_${job_name}.txt"
 log_file="results/${job_name}_log.txt"
@@ -25,7 +27,8 @@ sed "s#{SIZE}#${size}#g; \
      s#{DATASET}#${dataset}#g; \
      s#{LOGFILE}#${log_file}#g; \
      s#{JOBID}#${job_id}#g; \
-     s#{NGPU}#${nnode}#g" "$script_template" > "$temp_script"
+     s#{NNODE}#${nnode}#g; \
+     s#{NGPU}#${ngpus}#g" "$script_template" > "$temp_script"
 
 sed -i 's/\r//' "$temp_script"
 

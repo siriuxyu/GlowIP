@@ -3,7 +3,7 @@
 #BSUB -q gpuq
 #BSUB -n 4
 #BSUB -R "span[ptile=2]"
-#BSUB -gpu "num={NGPU}"
+#BSUB -gpu "num={NNODE}"
 #BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/output_{JOBNAME}.txt
 #BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/errput_{JOBNAME}.txt
 
