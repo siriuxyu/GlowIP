@@ -28,7 +28,7 @@ sed "s#{SIZE}#${size}#g; \
      s#{LOGFILE}#${log_file}#g; \
      s#{JOBID}#${job_id}#g; \
      s#{NNODE}#${nnode}#g; \
-     s#{NGPU}#${ngpus}#g" "$script_template" > "$temp_script"
+     s#{NGPUS}#${ngpus}#g" "$script_template" > "$temp_script"
 
 sed -i 's/\r//' "$temp_script"
 
