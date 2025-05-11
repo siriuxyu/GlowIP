@@ -3,7 +3,7 @@
 #BSUB -q gpuq
 #BSUB -n 4
 #BSUB -R "span[ptile=2]"
-#BSUB -gpu "num={NNODE}"
+#BSUB -gpu "num={NPGUS}"
 #BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/output_{JOBNAME}.txt
 #BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/errput_{JOBNAME}.txt
 
@@ -32,7 +32,7 @@ done
 # ==== 启动 torchrun（多GPU，多进程） ====
 torchrun \
   --nproc_per_node=2 \
-  --nnodes={NGPU} \
+  --nnodes={NNODE} \
   --node_rank=$NODE_RANK \
   --rdzv_backend=c10d \
   --rdzv_endpoint=$MASTER_ADDR:$MASTER_PORT \
