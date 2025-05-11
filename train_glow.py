@@ -165,7 +165,7 @@ def trainGlow(args):
                 warmup_completed = True
             # printing training metrics 
             print("\repoch=%0.2d..nll=%0.2f..logdet=%0.2f..logpz=%0.2f..mu=%0.2f..std=%0.2f..gradnorm=%0.2f"
-                  %(i,nll.item(),logdet,logpz,z_mu,z_std,grad_norm),end="\r")
+                  %(i,nll.item(),logdet.item(),logpz.item(),z_mu.item(),z_std.item(),grad_norm),end="\r")
             # saving generated samples during training
             try:
                 if j % args.sample_freq == 0:

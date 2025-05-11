@@ -17,7 +17,7 @@ source ~/anaconda3/etc/profile.d/conda.sh
 conda activate gpu122
 
 python train_glow.py \
-  --batchsize {BATCHSIZE} \
-  --dataset {DATASET} \
-  --size {SIZE} \
+  -batchsize {BATCHSIZE} \
+  -dataset {DATASET} \
+  -size {SIZE} \
   >> {LOGFILE}

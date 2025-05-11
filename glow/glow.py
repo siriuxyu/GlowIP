@@ -102,7 +102,7 @@ class Glow(nn.Module):
             nll = -(logdet + logpz).mean()
             nll = nll / float(np.log(2.) * h * w * c)
 
-            return nll, -logdet.mean().item(), -logpz.mean().item(), z_.mean().item(), z_.std().item()
+            return nll, -logdet.mean(), -logpz.mean(), z_.mean(), z_.std()
             # return Z, logdet, actloss
         
         if reverse:
