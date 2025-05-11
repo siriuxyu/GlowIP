@@ -26,6 +26,9 @@ sed "s#{SIZE}#${size}#g; \
      s#{LOGFILE}#${log_file}#g; \
      s#{JOBID}#${job_id}#g; \
      s#{NGPU}#${nnode}#g" "$script_template" > "$temp_script"
+
+sed -i 's/\r//' "$temp_script"
+
 # Remove old logs
 rm -f "$output_file" "$error_file" "$log_file"
 
@@ -33,5 +36,4 @@ rm -f "$output_file" "$error_file" "$log_file"
 bsub < "$temp_script"
 
 # Watch every 2 secs
-watch -n 2 bjobs
-
+# watch -n 2 bjobs

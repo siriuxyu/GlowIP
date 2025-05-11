@@ -39,4 +39,6 @@ torchrun \
   train_glow.py \
   --batchsize {BATCHSIZE} \
   --dataset {DATASET} \
-  --size {SIZE}
+  --size {SIZE} \
+  >> {LOGFILE} 2>&1
+
