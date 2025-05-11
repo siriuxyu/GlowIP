@@ -191,7 +191,7 @@ def trainGlow(args):
             except:
                 print("\n failed to sample from glow at global step = %d"%global_step)
             global_step = global_step + 1
-            global_loss.append(nll.item())
+            global_loss.append(nll.mean().item())
             if global_step % args.save_freq == 0:
                 torch.save(core_glow.state_dict(), model_path)
         
