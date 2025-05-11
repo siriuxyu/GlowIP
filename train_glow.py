@@ -144,7 +144,7 @@ def trainGlow(args):
                 global_step += 1
                 continue
             # backpropogating loss and gradient clipping
-            nll.backward()
+            nll.mean().backward()
             torch.nn.utils.clip_grad_value_(core_glow.parameters(), 5)
             grad_norm = torch.nn.utils.clip_grad_norm_(core_glow.parameters(), 100)
             # linearly increase learning rate till warmup_iter upto args.lr
