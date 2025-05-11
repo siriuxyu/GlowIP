@@ -18,17 +18,8 @@ from collections import defaultdict
 from data.npzdata import NPZDataset
 
 
-def setup_distributed():
-    dist.init_process_group(
-        backend='nccl',
-        init_method='env://'
-    )
-    local_rank = int(os.environ["LOCAL_RANK"])
-    torch.cuda.set_device(local_rank)
-    return local_rank
 
-
-def trainGlow(args, local_rank):
+def trainGlow(args):
     device = torch.device(f"cuda:{local_rank}")
     multiGPU = False
     if torch.cuda.device_count() > 1:
@@ -79,8 +70,7 @@ def trainGlow(args, local_rank):
         glow.load_state_dict(torch.load(model_path))
         if multiGPU:
             print(f"Using {torch.cuda.device_count()} GPUs")
-            glow = DDP(glow, device_ids=[local_rank])
-            # glow = torch.nn.DataParallel(glow)
+            glow = torch.nn.DataParallel(glow)
 
         print("pre-trained model and configs loaded successfully")
         glow.set_actnorm_init()
@@ -99,8 +89,7 @@ def trainGlow(args, local_rank):
         # Multi-GPU support
         if multiGPU:
             print(f"Using {torch.cuda.device_count()} GPUs")
-            glow = DDP(glow, device_ids=[local_rank])
-            # glow = torch.nn.DataParallel(glow)
+            glow = torch.nn.DataParallel(glow)
         
         print("saving configs as json file")
         with open(config_path, 'w') as f:
@@ -117,13 +106,8 @@ def trainGlow(args, local_rank):
     if args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]:
         dataset    = NPZDataset(npz_file, size=args.size)
         dataset.sample_images(800)
-        
-    if multiGPU:
-        sampler = DistributedSampler(dataset, num_replicas=torch.cuda.device_count(), rank=local_rank)
-        dataloader = DataLoader(dataset, batch_size=args.batchsize,
-                                                drop_last=True, shuffle=False, sampler=sampler)
-    else: 
-        dataloader = DataLoader(dataset, batch_size=args.batchsize,
+
+    dataloader = DataLoader(dataset, batch_size=args.batchsize,
                                                 drop_last=True, shuffle=True)
     
     
@@ -272,6 +256,6 @@ if __name__ == "__main__":
             print(f"Details: {e}")
             args.device = "cpu"
             
-    local_rank = setup_distributed()
-    trainGlow(args, local_rank)
+    
+    trainGlow(args)
     
