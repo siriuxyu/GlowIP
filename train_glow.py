@@ -1,4 +1,8 @@
 import torch 
+import torch.nn as nn
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data import DataLoader, DistributedSampler
 from torchvision import datasets
 import torchvision.transforms as transforms
 from torchvision.utils import make_grid
@@ -13,7 +17,24 @@ import re
 from collections import defaultdict
 from data.npzdata import NPZDataset
 
-def trainGlow(args):
+
+def setup_distributed():
+    dist.init_process_group(
+        backend='nccl',
+        init_method='env://'
+    )
+    local_rank = int(os.environ["LOCAL_RANK"])
+    torch.cuda.set_device(local_rank)
+    return local_rank
+
+
+def trainGlow(args, local_rank):
+    device = torch.device(f"cuda:{local_rank}")
+    multiGPU = False
+    if torch.cuda.device_count() > 1:
+        multiGPU = True
+        print(f"Using {torch.cuda.device_count()} GPUs")
+        
     save_path   = f"./trained_models/{args.dataset}/glow_{args.size}_{args.job_id}/"
     training_folder = f"./data/{args.dataset}_preprocessed/train/"
     npz_file     = f"./data/test_data/{args.dataset}/{args.dataset}_train.npz"
@@ -49,16 +70,17 @@ def trainGlow(args):
             glow = Glow(...)  # init with the loaded configs
 
 
-        glow = Glow((1,configs["size"],configs["size"]), device=args.device, 
+        glow = Glow((1,configs["size"],configs["size"]), device=device, 
                     K=configs["K"], L=configs["L"], coupling=configs["coupling"],
                     n_bits_x=configs["n_bits_x"], nn_init_last_zeros=configs["last_zeros"],
                     coupling_bias=configs.get("coupling_bias", 0),
                     squeeze_contig=configs.get("squeeze_contig", False),
                     )
         glow.load_state_dict(torch.load(model_path))
-        if torch.cuda.device_count() > 1:
+        if multiGPU:
             print(f"Using {torch.cuda.device_count()} GPUs")
-            glow = torch.nn.DataParallel(glow)
+            glow = DDP(glow, device_ids=[local_rank])
+            # glow = torch.nn.DataParallel(glow)
 
         print("pre-trained model and configs loaded successfully")
         glow.set_actnorm_init()
@@ -71,13 +93,14 @@ def trainGlow(args):
         glow = Glow((1,args.size,args.size),
                     K=args.K,L=args.L,coupling=args.coupling,n_bits_x=args.n_bits_x,
                     nn_init_last_zeros=args.last_zeros,
-                    device=args.device)
+                    device=device)
         glow.train()
         
         # Multi-GPU support
-        if torch.cuda.device_count() > 1:
+        if multiGPU:
             print(f"Using {torch.cuda.device_count()} GPUs")
-            glow = torch.nn.DataParallel(glow)
+            glow = DDP(glow, device_ids=[local_rank])
+            # glow = torch.nn.DataParallel(glow)
         
         print("saving configs as json file")
         with open(config_path, 'w') as f:
@@ -93,9 +116,14 @@ def trainGlow(args):
         dataset    = datasets.ImageFolder(training_folder, transform=trans)
     if args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]:
         dataset    = NPZDataset(npz_file, size=args.size)
-        dataset.sample_images(1000)
+        dataset.sample_images(800)
         
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batchsize,
+    if multiGPU:
+        sampler = DistributedSampler(dataset, num_replicas=torch.cuda.device_count(), rank=local_rank)
+        dataloader = DataLoader(dataset, batch_size=args.batchsize,
+                                                drop_last=True, shuffle=False, sampler=sampler)
+    else: 
+        dataloader = DataLoader(dataset, batch_size=args.batchsize,
                                                 drop_last=True, shuffle=True)
     
     
@@ -117,12 +145,13 @@ def trainGlow(args):
     global_loss = []
     warmup_completed = False
     for i in range(args.epochs):
+        sampler.set_epoch(i)
         Loss_epoch = []
         for j, data in enumerate(dataloader):
             opt.zero_grad()
             core_glow.zero_grad()
             # loading batch
-            x = data.to(device=args.device)*255
+            x = data.to(device=device)*255
             # pre-processing data
             x = core_glow.preprocess(x)
             # computing loss: "nll"
@@ -203,7 +232,8 @@ def trainGlow(args):
 #            plt.imshow(x_gen)
             
     # saving model weights
-    torch.save(core_glow.state_dict, model_path)
+    if torch.distributed.get_rank() == 0:
+        torch.save(glow.state_dict, model_path)
 
     # torch.save(glow.state_dict(), model_path)    
 
@@ -241,7 +271,7 @@ if __name__ == "__main__":
             print("WARNING: CUDA initialization failed, fallback to CPU.")
             print(f"Details: {e}")
             args.device = "cpu"
-    trainGlow(args)
+            
+    local_rank = setup_distributed()
+    trainGlow(args, local_rank)
     
-
-
