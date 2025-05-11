@@ -18,9 +18,7 @@ from collections import defaultdict
 from data.npzdata import NPZDataset
 
 
-
 def trainGlow(args):
-    device = torch.device(f"cuda:{local_rank}")
     multiGPU = False
     if torch.cuda.device_count() > 1:
         multiGPU = True
@@ -61,7 +59,7 @@ def trainGlow(args):
             glow = Glow(...)  # init with the loaded configs
 
 
-        glow = Glow((1,configs["size"],configs["size"]), device=device, 
+        glow = Glow((1,configs["size"],configs["size"]), device=args.device, 
                     K=configs["K"], L=configs["L"], coupling=configs["coupling"],
                     n_bits_x=configs["n_bits_x"], nn_init_last_zeros=configs["last_zeros"],
                     coupling_bias=configs.get("coupling_bias", 0),
@@ -83,7 +81,7 @@ def trainGlow(args):
         glow = Glow((1,args.size,args.size),
                     K=args.K,L=args.L,coupling=args.coupling,n_bits_x=args.n_bits_x,
                     nn_init_last_zeros=args.last_zeros,
-                    device=device)
+                    device=args.device)
         glow.train()
         
         # Multi-GPU support
@@ -129,13 +127,12 @@ def trainGlow(args):
     global_loss = []
     warmup_completed = False
     for i in range(args.epochs):
-        sampler.set_epoch(i)
         Loss_epoch = []
         for j, data in enumerate(dataloader):
             opt.zero_grad()
             core_glow.zero_grad()
             # loading batch
-            x = data.to(device=device)*255
+            x = data.to(device=args.device)*255
             # pre-processing data
             x = core_glow.preprocess(x)
             # computing loss: "nll"
@@ -216,10 +213,7 @@ def trainGlow(args):
 #            plt.imshow(x_gen)
             
     # saving model weights
-    if torch.distributed.get_rank() == 0:
-        torch.save(glow.state_dict, model_path)
-
-    # torch.save(glow.state_dict(), model_path)    
+    torch.save(glow.state_dict(), model_path)    
 
 
 if __name__ == "__main__":
@@ -256,6 +250,5 @@ if __name__ == "__main__":
             print(f"Details: {e}")
             args.device = "cpu"
             
-    
     trainGlow(args)
     

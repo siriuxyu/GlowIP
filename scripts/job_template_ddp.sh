@@ -2,7 +2,7 @@
 #BSUB -J {JOBNAME}
 #BSUB -q gpuq
 #BSUB -n 4
-#BSUB -R "select[ngpus>0] rusage[ngpus_shared=2]'
+#BSUB -gpu "num={NGPUS}"
 #BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/output_{JOBNAME}.txt
 #BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/errput_{JOBNAME}.txt
 
@@ -16,8 +16,24 @@ cd /gpfsdata/home/Zhaobo_hengjia21/GlowIP
 source ~/anaconda3/etc/profile.d/conda.sh
 conda activate gpu122
 
-python train_glow.py \
+export MASTER_ADDR=$(host $(echo $LSB_HOSTS | awk '{print $1}') | awk '{print $1}')
+export MASTER_PORT=29500
+
+HOSTNAMES=($(echo $LSB_HOSTS | tr ' ' '\n' | uniq))
+NODE_RANK=0
+for i in "${!HOSTNAMES[@]}"; do
+  [[ "${HOSTNAMES[$i]}" == "$(hostname)" ]] && NODE_RANK=$i
+done
+
+torchrun \
+  --nproc_per_node=2 \
+  --nnodes={NNODE} \
+  --node_rank=$NODE_RANK \
+  --rdzv_backend=c10d \
+  --rdzv_endpoint=$MASTER_ADDR:$MASTER_PORT \
+  train_glow.py \
   --batchsize {BATCHSIZE} \
   --dataset {DATASET} \
   --size {SIZE} \
-  >> {LOGFILE}
+  >> {LOGFILE} 2>&1
+
