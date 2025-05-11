@@ -1,5 +1,5 @@
-if [ $# -lt 6 ]; then
-  echo "Usage: $0 <mode> <dataset> <batchsize> <size> <nnode> <job_id>"
+if [ $# -lt 5 ]; then
+  echo "Usage: $0 <mode> <dataset> <batchsize> <size> <job_id>"
   exit 1
 fi
 
