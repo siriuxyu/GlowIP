@@ -88,7 +88,8 @@ class Glow(nn.Module):
             nll = -(logdet + logpz).mean()
             nll = nll / float(np.log(2.) * h * w * c)
 
-            return nll, -logdet.mean(), -logpz.mean(), z_.mean(), z_.std()
+            return nll.unsqueeze(0), -logdet.mean().unsqueeze(0), \
+                -logpz.mean().unsqueeze(0), z_.mean().unsqueeze(0), z_.std().unsqueeze(0)
             # return Z, logdet, actloss
         
         if reverse:
