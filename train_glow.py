@@ -126,7 +126,7 @@ def trainGlow(args):
     global_loss = []
     warmup_completed = False
     for i in range(args.epochs):
-        Loss_epoch = []
+        # Loss_epoch = []
         for j, data in enumerate(dataloader):
             opt.zero_grad()
             core_glow.zero_grad()
@@ -174,6 +174,7 @@ def trainGlow(args):
                     plt.ylabel("nll",size=15)
                     plt.savefig(save_path+"/nll_training_curve.jpg")
                     plt.close()
+                    print("\n saving generated samples at global step = %d"%global_step)
                     with torch.no_grad():
                         z_sample, z_sample_t = core_glow.generate_z(n=10,mu=0,std=0.7,to_torch=True)
                         print("sampled z shape = ",z_sample_t.shape)
