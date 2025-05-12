@@ -48,7 +48,7 @@ def trainGlow(args):
         print("creating directory to save model weights")
         os.makedirs(save_path)
     
-    _ = torch.inverse(torch.ones((1, 1), device="cuda:0"))  # init linear algebra to avoid lazy wrapper errors
+    _ = torch.inverse(torch.ones((1, 1), device=args.device))  # init linear algebra to avoid lazy wrapper errors
     
     # loading pre-trained model to resume training
     model_path = save_path + "glowmodel.pt"
@@ -59,8 +59,9 @@ def trainGlow(args):
             glow = Glow(...)  # init with the loaded configs
 
 
-        glow = Glow((1,configs["size"],configs["size"]), device=args.device, 
+        glow = Glow((1,configs["size"],configs["size"]), 
                     K=configs["K"], L=configs["L"], coupling=configs["coupling"],
+                    device=args.device, 
                     n_bits_x=configs["n_bits_x"], nn_init_last_zeros=configs["last_zeros"],
                     coupling_bias=configs.get("coupling_bias", 0),
                     squeeze_contig=configs.get("squeeze_contig", False),
