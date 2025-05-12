@@ -60,10 +60,9 @@ def trainGlow(args):
         glow = Glow((1,configs["size"],configs["size"]), 
                     K=configs["K"], L=configs["L"], coupling=configs["coupling"],
                     device=args.device, 
-                    n_bits_x=configs["n_bits_x"], nn_init_last_zeros=configs["last_zeros"],
-                    coupling_bias=configs.get("coupling_bias", 0),
-                    squeeze_contig=configs.get("squeeze_contig", False),
-                    )
+                    n_bits_x=configs["n_bits_x"], 
+                    nn_init_last_zeros=configs["last_zeros"])
+        
         glow.load_state_dict(torch.load(model_path))
         if multiGPU:
             print(f"Using {torch.cuda.device_count()} GPUs")
@@ -78,9 +77,10 @@ def trainGlow(args):
         # creating and initializing glow model
         print("creating and initializing model for training")
         glow = Glow((1,args.size,args.size),
-                    K=args.K,L=args.L,coupling=args.coupling,n_bits_x=args.n_bits_x,
-                    nn_init_last_zeros=args.last_zeros,
-                    device=args.device)
+                    K=args.K,L=args.L,coupling=args.coupling,
+                    device=args.device,
+                    n_bits_x=args.n_bits_x, 
+                    nn_init_last_zeros=args.last_zeros)
         glow.train()
         
         # Multi-GPU support
