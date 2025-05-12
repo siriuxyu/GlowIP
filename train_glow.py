@@ -103,7 +103,7 @@ def trainGlow(args):
         dataset    = datasets.ImageFolder(training_folder, transform=trans)
     if args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]:
         dataset    = NPZDataset(npz_file, size=args.size)
-        dataset.sample_images(800)
+        dataset.sample_images(args.n_data)
 
     dataloader = DataLoader(dataset, batch_size=args.batchsize,
                                                 drop_last=True, shuffle=True)
@@ -177,7 +177,7 @@ def trainGlow(args):
                     plt.close()
                     with torch.no_grad():
                         z_sample, z_sample_t = core_glow.generate_z(n=10,mu=0,std=0.7,to_torch=True)
-                        x_gen = core_glow(z_sample_t, reverse=True)
+                        x_gen = glow(z_sample_t, reverse=True)
                         x_gen = core_glow.postprocess(x_gen)
                         x_gen = make_grid(x_gen,nrow=int(np.sqrt(len(x_gen))))
                         x_gen = x_gen.data.cpu().numpy()
@@ -194,25 +194,7 @@ def trainGlow(args):
             global_loss.append(nll.mean().item())
             if global_step % args.save_freq == 0:
                 torch.save(core_glow.state_dict(), model_path)
-        
-#    # model visualization 
-#    temperature = [0.1,0.3,0.4,0.5,0.7,0.8,0.9]
-#    for temp in temperature:
-#        with torch.no_grad():
-#            glow.eval()
-#            z_sample, z_sample_t = glow.generate_z(n=10,mu=0,std=temp,to_torch=True)
-#            x_gen = glow(z_sample_t, reverse=True)
-#            x_gen = glow.postprocess(x_gen)
-#            x_gen = make_grid(x_gen,nrow=int(np.sqrt(len(x_gen))))
-#            x_gen = x_gen.data.cpu().numpy()
-#            x_gen = x_gen.transpose([1,2,0])
-#            if x_gen.shape[-1] == 1:
-#                x_gen = x_gen[...,0]
-#            plt.figure()
-#            plt.title("temperature = %0.1f"%temp,fontsize=15)
-#            plt.axis("off")
-#            plt.imshow(x_gen)
-            
+                
     # saving model weights
     torch.save(glow.state_dict(), model_path)    
 
@@ -224,6 +206,7 @@ if __name__ == "__main__":
     parser.add_argument('-L',type=int,help='no. of time squeezing is performed',default=6)
     parser.add_argument('-coupling',type=str,help='type of coupling layer to use',default='affine')
     parser.add_argument('-last_zeros',type=bool,help='whether to initialize last layer ot NN with zeros',default=True)
+    parser.add_argument('-n_data',type=int,help='no. of training images to use',default=800)
     parser.add_argument('-batchsize',type=int,help='batch size for training',default=3)
     parser.add_argument('-size',type=int,help='images will be resized to this dimension',default=64)
     parser.add_argument('-lr',type=float,help='learning rate for training',default=1e-5)

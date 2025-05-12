@@ -72,20 +72,6 @@ class Glow(nn.Module):
                     Z.append(z)
                 else:   
                     raise "Unknown Layer"
-                
-            
-            # for i in range( len(self.glow_modules) ):
-            #     module_name = self.glow_modules[i].__class__.__name__
-            #     if  module_name == "Squeeze":
-            #         x, logdet = self.glow_modules[i](x, logdet=logdet, reverse=False)
-            #     elif  module_name == "Flow":
-            #         x, logdet, actloss = self.glow_modules[i](x, logdet=logdet, reverse=False)
-            #     elif  module_name == "Split":
-            #         x, z = self.glow_modules[i](x, reverse=False)
-            #         Z.append(z)
-            #     else:
-            #         raise "Unknown Layer"
-
             Z.append(x)
             
             if not self.init_resizer:
