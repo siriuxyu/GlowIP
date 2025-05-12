@@ -56,8 +56,6 @@ def trainGlow(args):
         print("loading previous model and saved configs to resume training ...")
         with open(config_path, 'r') as f:
             configs = json.load(f)
-            glow = Glow(...)  # init with the loaded configs
-
 
         glow = Glow((1,configs["size"],configs["size"]), 
                     K=configs["K"], L=configs["L"], coupling=configs["coupling"],
