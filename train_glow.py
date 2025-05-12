@@ -22,7 +22,6 @@ def trainGlow(args):
     multiGPU = False
     if torch.cuda.device_count() > 1:
         multiGPU = True
-        print(f"Using {torch.cuda.device_count()} GPUs")
         
     save_path   = f"./trained_models/{args.dataset}/glow_{args.size}_{args.job_id}/"
     training_folder = f"./data/{args.dataset}_preprocessed/train/"
@@ -225,17 +224,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # Try to initialize CUDA, fallback to CPU if fails
     if args.device == "cuda":
-        try:
-            if not torch.cuda.is_available():
-                raise RuntimeError("CUDA not available")
-            # force trigger device count to check CUDA runtime
-            torch.cuda.device_count()
-            print("CUDA initialized successfully.")
-            print(f"Using device: {args.device}, GPU count: {torch.cuda.device_count()}")
-        except Exception as e:
-            print("WARNING: CUDA initialization failed, fallback to CPU.")
-            print(f"Details: {e}")
-            args.device = "cpu"
+        if not torch.cuda.is_available():
+            raise RuntimeError("CUDA not available")
+        # force trigger device count to check CUDA runtime
+        torch.cuda.device_count()
+        print("CUDA initialized successfully.")
+        print(f"Using device: {args.device}, GPU count: {torch.cuda.device_count()}")
             
     trainGlow(args)
     
