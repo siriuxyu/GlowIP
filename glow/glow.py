@@ -74,7 +74,7 @@ class Glow(nn.Module):
                     raise "Unknown Layer"
             Z.append(x)
             
-            if not self.init_resizer:
+            if (self.sizes is None) or (not self.init_resizer):
                 self.sizes = [t.size() for t in Z]
                 self.init_resizer = True
                 
@@ -115,7 +115,7 @@ class Glow(nn.Module):
     def nll_loss(self, x, logdet=None):
         n,c,h,w = x.size()
         z, logdet, actloss = self.forward(x,logdet=logdet,reverse=False)
-        if not self.init_resizer:
+        if (self.sizes is None) or (not self.init_resizer):
             self.sizes = [t.size() for t in z]
             self.init_resizer = True
         z_ = [ z_.view(n,-1) for z_ in z]
