@@ -177,9 +177,9 @@ def trainGlow(args):
                     print("\n saving generated samples at global step = %d"%global_step)
                     with torch.no_grad():
                         z_sample, z_sample_t = core_glow.generate_z(n=10,mu=0,std=0.7,to_torch=True)
-                        print("sampled z shape = ", [z_.shape for z_ in z_sample_t])
+                        print("sampled z shape = ", z_sample_t[0].shape)
                         x_gen = glow(z_sample_t, reverse=True)
-                        print("generated x shape = ",x_gen.shape)
+                        print("generated x shape = ", x_gen.shape)
                         x_gen = core_glow.postprocess(x_gen)
                         print("postprocessed x shape = ",x_gen.shape)
                         x_gen = make_grid(x_gen,nrow=int(np.sqrt(len(x_gen))))
