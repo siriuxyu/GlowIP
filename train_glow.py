@@ -177,7 +177,7 @@ def trainGlow(args):
                     plt.close()
                     with torch.no_grad():
                         z_sample, z_sample_t = core_glow.generate_z(n=10,mu=0,std=0.7,to_torch=True)
-                        x_gen = glow(z_sample_t, reverse=True)
+                        x_gen = core_glow(z_sample_t, reverse=True)
                         x_gen = core_glow.postprocess(x_gen)
                         x_gen = make_grid(x_gen,nrow=int(np.sqrt(len(x_gen))))
                         x_gen = x_gen.data.cpu().numpy()
@@ -187,7 +187,7 @@ def trainGlow(args):
                         if not os.path.exists(save_path+"/samples_training"):
                             os.makedirs(save_path+"/samples_training")
                         x_gen = (np.clip(x_gen, 0, 1) * 255).astype("uint8")
-                        sio.imsave(save_path+"/samples_training/%0.6d.jpg"%global_step, x_gen )
+                        sio.imsave(save_path+"/samples_training/%0.6d.jpg"%global_step, x_gen)
             except:
                 print("\n failed to sample from glow at global step = %d"%global_step)
             global_step = global_step + 1

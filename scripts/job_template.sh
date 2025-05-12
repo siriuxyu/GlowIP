@@ -20,5 +20,5 @@ python train_glow.py \
   -batchsize {BATCHSIZE} \
   -dataset {DATASET} \
   -size {SIZE} \
-  -jobid {JOBID} \
+  -job_id {JOBID} \
   >> {LOGFILE}
