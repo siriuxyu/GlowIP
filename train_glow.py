@@ -178,7 +178,7 @@ def trainGlow(args):
                     plt.close()
                     with torch.no_grad():
                         z_sample, z_sample_t = core_glow.generate_z(n=10,mu=0,std=0.7,to_torch=True)
-                        print("sampled z shape = ",z_sample[0].shape)
+                        print("sampled z shape = ",z_sample_t.shape)
                         x_gen = glow(z_sample_t, reverse=True)
                         print("generated x shape = ",x_gen.shape)
                         x_gen = core_glow.postprocess(x_gen)
