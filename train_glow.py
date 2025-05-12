@@ -188,7 +188,8 @@ def trainGlow(args):
                             os.makedirs(save_path+"/samples_training")
                         x_gen = (np.clip(x_gen, 0, 1) * 255).astype("uint8")
                         sio.imsave(save_path+"/samples_training/%0.6d.jpg"%global_step, x_gen)
-            except:
+            except Exception as e:
+                print(e)
                 print("\n failed to sample from glow at global step = %d"%global_step)
             global_step = global_step + 1
             global_loss.append(nll.mean().item())
