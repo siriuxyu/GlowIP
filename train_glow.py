@@ -125,7 +125,6 @@ def trainGlow(args):
     global_loss = []
     warmup_completed = False
     for i in range(args.epochs):
-        # Loss_epoch = []
         for j, data in enumerate(dataloader):
             opt.zero_grad()
             core_glow.zero_grad()
@@ -134,8 +133,6 @@ def trainGlow(args):
             # pre-processing data
             x = core_glow.preprocess(x)
             # computing loss: "nll"
-            # n,c,h,w = x.size()
-            # nll,logdet,logpz,z_mu,z_std = core_glow.nll_loss(x)
             nll,logdet,logpz,z_mu,z_std = glow(x)
             # skipping first batch due to data dependant initialization (if not initialized)
             if global_step == 0:
@@ -185,7 +182,6 @@ def trainGlow(args):
                         x_gen = x_gen.transpose([1,2,0])
                         if x_gen.shape[-1] == 1:
                             x_gen = x_gen[...,0]
-                        print(x_gen.shape)
                         if not os.path.exists(save_path+"/samples_training"):
                             os.makedirs(save_path+"/samples_training")
                         x_gen = (np.clip(x_gen, 0, 1) * 255).astype("uint8")

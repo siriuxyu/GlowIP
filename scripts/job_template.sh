@@ -21,6 +21,6 @@ python train_glow.py \
   -dataset {DATASET} \
   -size {SIZE} \
   -job_id {JOBID} \
-  -epochs 5 \
-  -n_data 10 \
+  -epochs 1000 \
+  -n_data 800 \
   >> {LOGFILE}

@@ -90,7 +90,6 @@ class Glow(nn.Module):
 
             return nll.unsqueeze(0), -logdet.mean().unsqueeze(0), \
                 -logpz.mean().unsqueeze(0), z_.mean().unsqueeze(0), z_.std().unsqueeze(0)
-            # return Z, logdet, actloss
         
         if reverse:
             if reverse_clone:
