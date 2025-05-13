@@ -151,7 +151,7 @@ def trainGlow(args):
             opt.step()
             # learning rate scheduling after warm up iterations
             if global_step > args.warmup_iter:
-                lr_scheduler.step(nll)
+                lr_scheduler.step(nll.mean())
                 if not warmup_completed:
                     if args.warmup_iter == 0:
                         print("no model warming...")
