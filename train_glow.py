@@ -164,7 +164,7 @@ def trainGlow(args):
                     z_mu.mean().item(), z_std.mean().item(), grad_norm),end="\r")
             # saving generated samples during training
             try:
-                if j % args.sample_freq == 0:
+                if global_step % args.sample_freq == 0:
                     plt.plot(global_loss)
                     plt.xlabel("iterations",size=15)
                     plt.ylabel("nll",size=15)
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     parser.add_argument('-n_bits_x',type=int,help='requantization of training images',default=5)
     parser.add_argument('-epochs',type=int,help='epochs to train for',default=1000)
     parser.add_argument('-warmup_iter',type=int,help='no. of warmup iterations',default=10000)
-    parser.add_argument('-sample_freq',type=int,help='sample after every save_freq',default=500)
+    parser.add_argument('-sample_freq',type=int,help='sample after every save_freq',default=50)
     parser.add_argument('-save_freq',type=int,help='save after every save_freq',default=1000)
     parser.add_argument('-coupling_bias', type=float,help='additive bias to the scale parameter of each affine coupling layer to prevent division by eps', default=0)
     parser.add_argument('-squeeze_contig', action="store_true", help="whether to select contiguous components of activations in each squeeze layer")
