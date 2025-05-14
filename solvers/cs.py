@@ -18,7 +18,11 @@ import os
 from glob import glob
 import easydict
 from scipy.linalg import null_space
-from data.npzdata import NPZDataset
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../data')))
+from nzpdata import NPZDataset
+
 import warnings
 warnings.filterwarnings("ignore")
 
