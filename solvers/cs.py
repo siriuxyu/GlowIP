@@ -92,7 +92,16 @@ def GlowCS(args):
                         n_bits_x=configs["n_bits_x"],
                         nn_init_last_zeros=configs["last_zeros"],
                         device=args.device)
-            glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt"))
+            
+            state_dict = torch.load(modeldir+"/glowmodel.pt")
+            # 兼容去掉 "module." 前缀
+            from collections import OrderedDict
+            new_state_dict = OrderedDict()
+            for k, v in state_dict.items():
+                new_key = k.replace("module.", "")  # 去掉前缀
+                new_state_dict[new_key] = v
+                
+            glow.load_state_dict(new_state_dict)
             glow.eval()
             
             # making a forward to record shapes of z's for reverse pass
