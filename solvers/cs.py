@@ -43,20 +43,20 @@ def GlowCS(args):
 
     for m, gamma, init_norm in loopOver:
         skip_to_next = False # flag to skip to next loop if recovery is fails due to instability
-        n                  = args.size*args.size*1      # 1 channel for MRI
-        modeldir           = "./trained_models/%s/glow"%args.model
+        n                  = args.size * args.size * 1      # 1 channel for MRI
+        modeldir           = f"./trained_models/{args.dataset}/glow_{args.size}_{args.job_id}/"
         # test_folder        = "./test_images/%s"%args.dataset
-        npz_folder         = "./data/mri/%s.npz"%args.dataset
+        npz_file           = f"./data/test_data/{args.dataset}/{args.dataset}_test.npz"
         save_path          = "./results/%s/%s"%(args.dataset,args.experiment)
 
         # loading dataset
         # trans           = transforms.Compose([transforms.Resize((args.size,args.size)),transforms.ToTensor()])
         # test_dataset    = datasets.ImageFolder(test_folder, transform=trans)
-        test_dataset    = NPZDataset(npz_folder)
+        test_dataset    = NPZDataset(npz_file)
         test_dataloader = torch.utils.data.DataLoader(test_dataset,batch_size=args.batchsize,drop_last=True,shuffle=False)
         
         # loading glow configurations
-        config_path = modeldir+"/configs.json"
+        config_path = modeldir + "configs.json"
         with open(config_path, 'r') as f:
             configs = json.load(f)
         

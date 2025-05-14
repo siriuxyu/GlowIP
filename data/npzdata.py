@@ -46,7 +46,7 @@ class NPZDataset(Dataset):
         """
         if num_samples <= 0:
             raise ValueError("num_samples must be a positive integer.")
-        elif num_samples > self.length:
+        elif num_samples >= self.length:
             num_samples = self.length
             return
         else:
