@@ -23,4 +23,5 @@ python train_glow.py \
   -job_id {JOBID} \
   -epochs 1000 \
   -n_data 800 \
+  -lr 5e-5 \
   >> {LOGFILE}
