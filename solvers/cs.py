@@ -18,6 +18,7 @@ import os
 from glob import glob
 import easydict
 from scipy.linalg import null_space
+import cv2
 
 import warnings
 warnings.filterwarnings("ignore")
