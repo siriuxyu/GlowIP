@@ -17,14 +17,13 @@ log_file="results/${job_name}_log.txt"
 temp_script="scripts/job_${job_name}_temp.sh"
 
 if [ "$mode" == "train" ]; then
-  script_template="scripts/job_template.sh"
+  script_template="scripts/train_template.sh"
 elif [ "$mode" == "solve" ]; then
   script_template="scripts/solve_template.sh"
 else
   echo "Invalid mode. Use 'train' or 'solve'."
   exit 1
 fi
-
 
 # Substitute placeholders in the job template
 sed "s#{SIZE}#${size}#g; \
