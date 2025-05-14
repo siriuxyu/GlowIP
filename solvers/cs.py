@@ -52,7 +52,7 @@ def GlowCS(args):
         # loading dataset
         # trans           = transforms.Compose([transforms.Resize((args.size,args.size)),transforms.ToTensor()])
         # test_dataset    = datasets.ImageFolder(test_folder, transform=trans)
-        test_dataset    = NPZDataset(npz_file)
+        test_dataset    = NPZDataset(npz_file, size=args.size)
         test_dataloader = torch.utils.data.DataLoader(test_dataset,batch_size=args.batchsize,drop_last=True,shuffle=False)
         
         # loading glow configurations
