@@ -18,10 +18,6 @@ import os
 from glob import glob
 import easydict
 from scipy.linalg import null_space
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../data')))
-from npzdata import NPZDataset
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -617,17 +613,44 @@ def DCTCS(args):
             np.save(save_path + "/original.npy", x_test)
             np.save(save_path + "/recovered.npy", x_hat)
 
+
 class NPZDataset(Dataset):
-    def __init__(self, npz_file_path):
+    def __init__(self, npz_file_path, size=64):
         data = np.load(npz_file_path)
+
         self.images = data['all_imgs']
         self.length = len(self.images)
-
+        self.size = size
+        
     def __len__(self):
         return self.length
 
     def __getitem__(self, idx):
-        image = self.images[idx]
-        image = image.astype(np.float32) / 255.0  # Normalize to [0, 1]
-        image = np.expand_dims(image, axis=0)  # shape: (1, height, width)
-        return torch.from_numpy(image)
+        img = self.images[idx]
+        if img.ndim == 2:
+            # GrayScale: H x W → 1 x H x W
+            img = img[np.newaxis, :, :]
+        elif img.ndim == 3 and img.shape[0] not in (1, 3):
+            # Color: C x H x W → 1 x C x H x W
+            img = np.transpose(img, (2, 0, 1))
+            
+        img_resized = np.zeros((img.shape[0], self.size, self.size), dtype=np.float32)
+        for c in range(img.shape[0]):
+            img_resized[c] = cv2.resize(img[c], (self.size, self.size), interpolation=cv2.INTER_AREA)
+
+        return torch.from_numpy(img_resized / 255.0).float()
+
+    def sample_images(self, num_samples=1000):
+        """
+        Randomly sample a specified number of images from the dataset.
+        """
+        if num_samples <= 0:
+            raise ValueError("num_samples must be a positive integer.")
+        elif num_samples >= self.length:
+            num_samples = self.length
+            return
+        else:
+            indices = np.random.choice(self.length, num_samples, replace=False)
+            sampled_images = self.images[indices]
+            self.images = sampled_images
+            self.length = num_samples
