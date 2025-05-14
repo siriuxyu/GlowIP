@@ -18,6 +18,7 @@ conda activate gpu122
 
 python solve_cs.py -experiment exp2 \
         -m 5000 -gamma 0 -init_std 0 \
+        -lr 0.05 -steps 50 \
         -dataset {DATASET} \
         -model {DATASET} \
         -job_id {JOBID} \
