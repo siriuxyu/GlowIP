@@ -18,6 +18,7 @@ import os
 from glob import glob
 import easydict
 from scipy.linalg import null_space
+from data.npzdata import NPZDataset
 import warnings
 warnings.filterwarnings("ignore")
 

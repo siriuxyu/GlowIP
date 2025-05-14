@@ -13,8 +13,6 @@ import matplotlib.pyplot as plt
 import os
 import json
 import argparse
-import re
-from collections import defaultdict
 from data.npzdata import NPZDataset
 
 
