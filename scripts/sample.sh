@@ -17,4 +17,5 @@ source ~/anaconda3/etc/profile.d/conda.sh
 conda activate gpu122
 
 
-python sample_glow.py -dataset BraTS -size 128 -device cpu -job_id 6
+python sample_glow.py -dataset BraTS -size 128 -job_id 5 \
+    >> sample_glow_braTS_128_5.log
