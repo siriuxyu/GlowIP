@@ -39,10 +39,12 @@ def sampleGlow(args):
         for k, v in state_dict.items():
             new_key = k.replace("module.", "")  # 去掉前缀
             new_state_dict[new_key] = v
-                
+        
         glow.load_state_dict(new_state_dict)
+        
+        print("pre-trained model and configs loaded successfully")
+        glow.set_actnorm_init()
 
-    
     else:
         raise FileNotFoundError(f"Model file {model_path} not found. Please check the path.")
 
