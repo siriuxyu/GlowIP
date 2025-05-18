@@ -11,5 +11,5 @@ data/mri
 data/test_data
 results/errput*
 results/output*
-
+.DS_Store
 
