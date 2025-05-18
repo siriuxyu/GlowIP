@@ -208,7 +208,7 @@ if __name__ == "__main__":
     parser.add_argument('-size',type=int,help='images will be resized to this dimension',default=64)
     parser.add_argument('-lr',type=float,help='learning rate for training',default=5e-5)
     parser.add_argument('-n_bits_x',type=int,help='requantization of training images',default=5)
-    parser.add_argument('-epochs',type=int,help='epochs to train for',default=1000)
+    parser.add_argument('-epochs',type=int,help='epochs to train for',default=500)
     parser.add_argument('-warmup_iter',type=int,help='no. of warmup iterations',default=10000)
     parser.add_argument('-sample_freq',type=int,help='sample after every save_freq',default=50)
     parser.add_argument('-save_freq',type=int,help='save after every save_freq',default=1000)
