@@ -87,7 +87,7 @@ def GlowCS(args):
                     nn_init_last_zeros=configs["last_zeros"],
                     device=args.device)
         
-        state_dict = torch.load(modeldir+"/glowmodel.pt")
+        state_dict = torch.load(modeldir + "/glowmodel.pt")
         # 兼容去掉 "module." 前缀
         from collections import OrderedDict
         new_state_dict = OrderedDict()
@@ -97,6 +97,11 @@ def GlowCS(args):
             
         glow.load_state_dict(new_state_dict)
         glow.eval()
+        
+        if torch.cuda.device_count() > 1:
+            glow = torch.nn.DataParallel(glow)
+        
+        core_glow = glow.module if isinstance(glow, torch.nn.DataParallel) else glow
         
         # making a forward to record shapes of z's for reverse pass
         _ = glow(glow.preprocess(torch.zeros_like(x_test)))
