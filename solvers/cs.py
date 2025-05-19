@@ -79,6 +79,27 @@ def GlowCS(args):
             noise = noise / (np.linalg.norm(noise,2,axis=-1, keepdims=True)) * float(args.noise)
             noise = torch.tensor(noise, dtype=torch.float, requires_grad=False, device=args.device)
         
+        # loading glow model
+        glow = Glow((1,args.size,args.size),    # 1 channel for MRI
+                    K=configs["K"],L=configs["L"],
+                    coupling=configs["coupling"],
+                    n_bits_x=configs["n_bits_x"],
+                    nn_init_last_zeros=configs["last_zeros"],
+                    device=args.device)
+        
+        state_dict = torch.load(modeldir+"/glowmodel.pt")
+        # 兼容去掉 "module." 前缀
+        from collections import OrderedDict
+        new_state_dict = OrderedDict()
+        for k, v in state_dict.items():
+            new_key = k.replace("module.", "")  # 去掉前缀
+            new_state_dict[new_key] = v
+            
+        glow.load_state_dict(new_state_dict)
+        glow.eval()
+        
+        # making a forward to record shapes of z's for reverse pass
+        _ = glow(glow.preprocess(torch.zeros_like(x_test)))
         # start solving over batches
         Original = []; Recovered = []; Z_Recovered = []; Residual_Curve = []; Recorded_Z = []
         for i, data in enumerate(test_dataloader):
@@ -86,28 +107,6 @@ def GlowCS(args):
             x_test = x_test.clone().to(device=args.device)
             n_test = x_test.size()[0]
             assert n_test == args.batchsize, "please make sure that no. of images are evenly divided by batchsize"
-            
-            # loading glow model
-            glow = Glow((1,args.size,args.size),    # 1 channel for MRI
-                        K=configs["K"],L=configs["L"],
-                        coupling=configs["coupling"],
-                        n_bits_x=configs["n_bits_x"],
-                        nn_init_last_zeros=configs["last_zeros"],
-                        device=args.device)
-            
-            state_dict = torch.load(modeldir+"/glowmodel.pt")
-            # 兼容去掉 "module." 前缀
-            from collections import OrderedDict
-            new_state_dict = OrderedDict()
-            for k, v in state_dict.items():
-                new_key = k.replace("module.", "")  # 去掉前缀
-                new_state_dict[new_key] = v
-                
-            glow.load_state_dict(new_state_dict)
-            glow.eval()
-            
-            # making a forward to record shapes of z's for reverse pass
-            _ = glow(glow.preprocess(torch.zeros_like(x_test)))
             
             # initializing z from Gaussian with std equal to init_std
             if args.init_strategy == "random":
