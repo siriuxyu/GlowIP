@@ -49,12 +49,19 @@ def trainGlow(args):
     
     # loading pre-trained model to resume training
     model_path = save_path + "glowmodel.pt"
+    if args.dataset == "celeba":
+        channel = 3
+    elif args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]:
+        channel = 1
+    else:
+        raise ValueError("dataset not supported")
+    
     if os.path.exists(model_path):
         print("loading previous model and saved configs to resume training ...")
         with open(config_path, 'r') as f:
             configs = json.load(f)
 
-        glow = Glow((1,configs["size"],configs["size"]), 
+        glow = Glow((channel,configs["size"],configs["size"]), 
                     K=configs["K"], L=configs["L"], coupling=configs["coupling"],
                     device=args.device, 
                     n_bits_x=configs["n_bits_x"], 
@@ -73,7 +80,7 @@ def trainGlow(args):
     else:
         # creating and initializing glow model
         print("creating and initializing model for training")
-        glow = Glow((1,args.size,args.size),
+        glow = Glow((channel,args.size,args.size),
                     K=args.K,L=args.L,coupling=args.coupling,
                     device=args.device,
                     n_bits_x=args.n_bits_x, 
