@@ -93,68 +93,6 @@ def GlowCS(args):
             # making a forward to record shapes of z's for reverse pass
             _ = glow(core_glow.preprocess(torch.zeros_like(x_test)))
             
-            # # initializing z from Gaussian with std equal to init_std
-            # if args.init_strategy == "random":
-            #     z_sampled = np.random.normal(0,args.init_std,[n_test,n])
-            #     z_sampled = torch.tensor(z_sampled,requires_grad=True,dtype=torch.float,device=args.device)
-            # # intializing z from Gaussian and scaling its norm to init_norm
-            # elif args.init_strategy == "random_fixed_norm":
-            #     z_sampled = np.random.normal(0,1,[n_test,n])
-            #     z_sampled = z_sampled / np.linalg.norm(z_sampled, axis=-1, keepdims=True)
-            #     z_sampled = z_sampled * init_norm
-            #     z_sampled = torch.tensor(z_sampled,requires_grad=True,dtype=torch.float,device=args.device)
-            #     print("z intialized with a norm equal to = %0.1f"%init_norm)
-            # # initializing z from pseudo inverse
-            # elif args.init_strategy == "pseudo_inverse":
-            #     x_test_flat = x_test.view([-1,n])
-            #     y_true      = torch.matmul(x_test_flat, A) + noise
-            #     A_pinv      = torch.pinverse(A)
-            #     x_pinv      = torch.matmul(y_true, A_pinv)
-            #     x_pinv      = x_pinv.view([-1,3,args.size,args.size])
-            #     x_pinv      = torch.clamp(x_pinv,0,1)
-            #     z, _, _     = glow(glow.preprocess(x_pinv*255,clone=True))
-            #     z           = glow.flatten_z(z).clone().detach()
-            #     z_sampled   = torch.tensor(z, requires_grad=True, dtype=torch.float, device=args.device)
-            # # initializing z from a solution of lasso-wavelet 
-            # elif args.init_strategy == "lasso_wavelet":
-            #     new_args    = {"batch_size":n_test, "lmbd":0.01,"lasso_solver":"sklearn"}
-            #     new_args    = easydict.EasyDict(new_args)   
-            #     estimator   = celebA_estimators.lasso_wavelet_estimator(new_args)
-            #     x_ch_last   = x_test.permute(0,2,3,1)
-            #     x_ch_last   = x_ch_last.contiguous().view([-1,n])
-            #     y_true      = torch.matmul(x_ch_last, A) + noise
-            #     x_lasso     = estimator(np.sqrt(2*m)*A.data.cpu().numpy(), np.sqrt(2*m)*y_true.data.cpu().numpy(), new_args)
-            #     x_lasso     = np.array(x_lasso)
-            #     x_lasso     = x_lasso.reshape(-1,64,64,3)
-            #     x_lasso     = x_lasso.transpose(0,3,1,2)
-            #     x_lasso     = torch.tensor(x_lasso, dtype=torch.float, device=args.device)
-            #     z, _, _     = glow(x_lasso - 0.5)
-            #     z           = glow.flatten_z(z).clone().detach()
-            #     z_sampled   = torch.tensor(z, requires_grad=True, dtype=torch.float, device=args.device)
-            #     print("z intialized from a solution of lasso-wavelet")
-            # # intializing z from null(A)
-            # elif args.init_strategy == "null_space":
-            #     x_test_flat    = x_test.view([-1,n])
-            #     x_test_flat_np = x_test_flat.data.cpu().numpy()
-            #     A_np        = A.data.cpu().numpy()
-            #     nullA       = null_space(A_np.T)
-            #     coeff       = np.random.normal(0,1,(args.batchsize, nullA.shape[1]))            
-            #     x_null      = np.array([(nullA * c).sum(axis=-1) for c in coeff])
-            #     pert_norm   = 5 # <-- 5 gives optimal results --  bad initialization and not too unstable
-            #     x_null      = x_null / np.linalg.norm(x_null, axis=1, keepdims=True) * pert_norm
-            #     x_perturbed = x_test_flat_np + x_null
-            #     # no clipping x_perturbed to make sure forward model is ||y-Ax|| is the same
-            #     err         = np.matmul(x_test_flat_np,A_np) - np.matmul(x_perturbed,A_np)
-            #     assert (err **2).sum() < 1e-6, "null space does not satisfy ||y-A(x+x0)|| <= 1e-6"
-            #     x_perturbed = x_perturbed.reshape(-1,3,args.size,args.size)
-            #     x_perturbed = torch.tensor(x_perturbed, dtype=torch.float, device=args.device)
-            #     z, _, _     = glow(x_perturbed - 0.5)
-            #     z           = glow.flatten_z(z).clone().detach()
-            #     z_sampled   = torch.tensor(z, requires_grad=True, dtype=torch.float, device=args.device)
-            #     print("z initialized from a point in null space of A")
-            # else:
-            #     raise "Initialization strategy not defined"
-            
             z_sampled = sample_z(glow, core_glow, args, n_test, n, m=m, init_norm=init_norm, A=A, noise=noise, x_test=x_test)
             
             # selecting optimizer

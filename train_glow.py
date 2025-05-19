@@ -127,6 +127,8 @@ def trainGlow(args):
             opt.zero_grad()
             core_glow.zero_grad()
             # loading batch
+            if args.dataset == "celeba":
+                data = data[0]
             x = data.to(device=args.device)*255
             # pre-processing data
             x = core_glow.preprocess(x)
