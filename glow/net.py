@@ -52,27 +52,11 @@ class NN(nn.Module):
         x, _, _ = self.actnorm2(x, logdet=0, reverse=False) 
         x = F.relu(x)
         x = self.conv3(x)
-        x = x * torch.exp(self.logs * 3)
+        # x = x * torch.exp(self.logs * 3)
+        logs_c = torch.clamp(self.logs, -2., 2.)   # 软约束
+        x = x * torch.exp(logs_c * 3)
+
         return x
     
     
-    
-if __name__ == "__main__":
-    size = (16,64,16,16)
-    net = NN(channels_in=64,channels_out=64, device=device,init_last_zeros=True)
-    opt = torch.optim.Adam(net.parameters(), lr=0.0001)
-    
-    for i in range(5000):
-        opt.zero_grad()
-        x = torch.tensor(np.random.normal(0,1,size),dtype=torch.float,device=device)
-        y_true = x*2 + 2
-        y = net(x)
-        loss = torch.norm(y - y_true)
-        mu   = y.mean().item()
-        std  = y.std().item()
-        loss.backward()
-        opt.step()
-        if i % 10 == 0:
-            print("\r loss=%0.3f| mu=%0.3f | std=%0.3f"%(loss.item(),mu,std), end="\r")
-            
     
