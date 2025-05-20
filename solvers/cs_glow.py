@@ -81,7 +81,7 @@ def GlowCS(args):
                         nn_init_last_zeros=configs["last_zeros"],
                         device=args.device)
             
-            state_dict = torch.load(modeldir + "/glowmodel.pt", weights_only=True)
+            state_dict = torch.load(modeldir + "/glowmodel.pt")
             
             
             new_state_dict = OrderedDict()
