@@ -1,5 +1,5 @@
 import argparse
-from solvers.cs import solveCS
+from solvers.cs_glow import GlowCS
 
 
 if __name__ == "__main__":
@@ -25,5 +25,5 @@ if __name__ == "__main__":
     parser.add_argument('-z_penalty_unsquared', action="store_true",help="use ||z|| if True else ||z||^2")
     parser.add_argument('-job_id', type=str, help='job id to use for logging', default='0')
     args = parser.parse_args()
-    solveCS(args)
+    GlowCS(args)
     

@@ -19,6 +19,7 @@ from glob import glob
 import easydict
 from scipy.linalg import null_space
 import cv2
+from collections import OrderedDict
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -89,7 +90,6 @@ def GlowCS(args):
         
         state_dict = torch.load(modeldir + "/glowmodel.pt")
         # 兼容去掉 "module." 前缀
-        from collections import OrderedDict
         new_state_dict = OrderedDict()
         for k, v in state_dict.items():
             new_key = k.replace("module.", "")  # 去掉前缀
