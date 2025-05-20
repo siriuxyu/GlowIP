@@ -21,6 +21,13 @@ def GlowCS(args):
         assert args.init_strategy == "random_fixed_norm", "init_strategy should be random_fixed_norm if init_norms is used"
     assert len(args.m) == len(args.gamma) == len(args.init_norms), "length of either m, gamma or init_norms are not same"
     loopOver = zip(args.m, args.gamma, args.init_norms)
+    
+    if args.dataset == "celeba":
+        channels = 3
+    elif args.dataset == "BraTS":
+        channels = 1
+    else:
+        raise "dataset not defined"
 
     for m, gamma, init_norm in loopOver:
         skip_to_next = False # flag to skip to next loop if recovery is fails due to instability
@@ -67,14 +74,14 @@ def GlowCS(args):
             
                 
             # loading glow model
-            glow = Glow((1,args.size,args.size),    # 1 channel for MRI
+            glow = Glow((channels,args.size,args.size),    # 1 channel for MRI
                         K=configs["K"],L=configs["L"],
                         coupling=configs["coupling"],
                         n_bits_x=configs["n_bits_x"],
                         nn_init_last_zeros=configs["last_zeros"],
                         device=args.device)
             
-            state_dict = torch.load(modeldir + "/glowmodel.pt")
+            state_dict = torch.load(modeldir + "/glowmodel.pt", weights_only=True)
             
             
             new_state_dict = OrderedDict()
@@ -282,7 +289,7 @@ class NPZDataset(Dataset):
             self.length = num_samples
 
 
-def sample_z(glow, core_glow, args, n_test, n, m=None, init_norm=None, A=None, noise=None, x_test=None):
+def sample_z(glow, core_glow, args, n_test, n, channels=1, m=None, init_norm=None, A=None, noise=None, x_test=None):
 
     # initializing z from Gaussian with std equal to init_std
     if args.init_strategy == "random":
@@ -301,7 +308,7 @@ def sample_z(glow, core_glow, args, n_test, n, m=None, init_norm=None, A=None, n
         y_true      = torch.matmul(x_test_flat, A) + noise
         A_pinv      = torch.pinverse(A)
         x_pinv      = torch.matmul(y_true, A_pinv)
-        x_pinv      = x_pinv.view([-1,3,args.size,args.size])
+        x_pinv      = x_pinv.view([-1,channels,args.size,args.size])
         x_pinv      = torch.clamp(x_pinv,0,1)
         z, _, _     = glow(core_glow.preprocess(x_pinv*255,clone=True))
         z           = core_glow.flatten_z(z).clone().detach()
@@ -316,7 +323,7 @@ def sample_z(glow, core_glow, args, n_test, n, m=None, init_norm=None, A=None, n
         y_true      = torch.matmul(x_ch_last, A) + noise
         x_lasso     = estimator(np.sqrt(2*m)*A.data.cpu().numpy(), np.sqrt(2*m)*y_true.data.cpu().numpy(), new_args)
         x_lasso     = np.array(x_lasso)
-        x_lasso     = x_lasso.reshape(-1,64,64,3)
+        x_lasso     = x_lasso.reshape(-1,64,64,channels)
         x_lasso     = x_lasso.transpose(0,3,1,2)
         x_lasso     = torch.tensor(x_lasso, dtype=torch.float, device=args.device)
         z, _, _     = glow(x_lasso - 0.5)
@@ -337,7 +344,7 @@ def sample_z(glow, core_glow, args, n_test, n, m=None, init_norm=None, A=None, n
         # no clipping x_perturbed to make sure forward model is ||y-Ax|| is the same
         err         = np.matmul(x_test_flat_np,A_np) - np.matmul(x_perturbed,A_np)
         assert (err **2).sum() < 1e-6, "null space does not satisfy ||y-A(x+x0)|| <= 1e-6"
-        x_perturbed = x_perturbed.reshape(-1,3,args.size,args.size)
+        x_perturbed = x_perturbed.reshape(-1,channels,args.size,args.size)
         x_perturbed = torch.tensor(x_perturbed, dtype=torch.float, device=args.device)
         z, _, _     = glow(x_perturbed - 0.5)
         z           = core_glow.flatten_z(z).clone().detach()
