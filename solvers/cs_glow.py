@@ -356,3 +356,6 @@ def sample_z(glow, core_glow, args, n_test, n, channels=1, m=None, init_norm=Non
         print("z initialized from a point in null space of A")
     else:
         raise "Initialization strategy not defined"
+    
+    return z_sampled
+    
