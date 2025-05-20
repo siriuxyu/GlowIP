@@ -97,6 +97,10 @@ def GlowCS(args):
             
             core_glow = glow.module if isinstance(glow, torch.nn.DataParallel) else glow
             
+            # to avoid lazy initialization of actnorm
+            with torch.no_grad():
+                core_glow(torch.randn(1, channels, 128, 128).to(args.device))
+            
             # making a forward to record shapes of z's for reverse pass
             _ = glow(core_glow.preprocess(torch.zeros_like(x_test)))
             
