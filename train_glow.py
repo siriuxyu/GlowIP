@@ -223,7 +223,6 @@ if __name__ == "__main__":
     parser.add_argument('-warmup_iter',type=int,help='no. of warmup iterations',default=10000)
     parser.add_argument('-sample_freq',type=int,help='sample after every save_freq',default=50)
     parser.add_argument('-save_freq',type=int,help='save after every save_freq',default=1000)
-    parser.add_argument('-coupling_bias', type=float,help='additive bias to the scale parameter of each affine coupling layer to prevent division by eps', default=0)
     parser.add_argument('-squeeze_contig', action="store_true", help="whether to select contiguous components of activations in each squeeze layer")
     parser.add_argument('-device',type=str,help='whether to use',default="cuda")  
     parser.add_argument('-job_id', type=str, help='job id to save the model', default="0")  
