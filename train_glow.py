@@ -180,7 +180,7 @@ def trainGlow(args):
                     print("\n saving generated samples at global step = %d"%global_step)
                     with torch.no_grad():
                         with torch.no_grad():
-                            core_glow(torch.randn(1, 1, 128, 128).to(args.device))
+                            core_glow(torch.randn(1, channel, 128, 128).to(args.device))
                         z_sample, z_sample_t = core_glow.generate_z(n=10,mu=0,std=0.7,to_torch=True)
                         x_gen = glow(z_sample_t, reverse=True)
                         x_gen = core_glow.postprocess(x_gen)
