@@ -81,6 +81,9 @@ def GlowCS(args):
                         nn_init_last_zeros=configs["last_zeros"],
                         device=args.device)
             
+            print("torch.load =", torch.load)
+            print("type(torch.load) =", type(torch.load))
+
             # state_dict = torch.load(modeldir + "glowmodel.pt")
             
             
