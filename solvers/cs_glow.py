@@ -81,20 +81,15 @@ def GlowCS(args):
                         nn_init_last_zeros=configs["last_zeros"],
                         device=args.device)
             
-            print("torch.load =", torch.load)
-            print("type(torch.load) =", type(torch.load))
-
-            # state_dict = torch.load(modeldir + "glowmodel.pt")
+            state_dict = torch.load(modeldir + "glowmodel.pt")
             
-            
-            # new_state_dict = OrderedDict()
-            # for k, v in state_dict.items():
-            #     new_key = k.replace("module.", "")  # 去掉前缀
-            #     new_state_dict[new_key] = v
+            new_state_dict = OrderedDict()
+            for k, v in state_dict.items():
+                new_key = k.replace("module.", "")  # 去掉前缀
+                new_state_dict[new_key] = v
                 
-            # glow.load_state_dict(new_state_dict)
+            glow.load_state_dict(new_state_dict)
             
-            glow.load_state_dict(torch.load(modeldir + "glowmodel.pt"))
             glow.eval()
             
             if torch.cuda.device_count() > 1:
