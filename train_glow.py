@@ -82,6 +82,7 @@ def trainGlow(args):
         print("creating and initializing model for training")
         glow = Glow((channel,args.size,args.size),
                     K=args.K,L=args.L,coupling=args.coupling,
+                    coupling_bias=args.coupling_bias,
                     device=args.device,
                     n_bits_x=args.n_bits_x, 
                     nn_init_last_zeros=args.last_zeros)
@@ -211,6 +212,7 @@ if __name__ == "__main__":
     parser.add_argument('-K',type=int,help='no. of steps of flow',default=32)
     parser.add_argument('-L',type=int,help='no. of time squeezing is performed',default=6)
     parser.add_argument('-coupling',type=str,help='type of coupling layer to use',default='affine')
+    parser.add_argument('-coupling_bias',type=float,help='additive bias to the scale parameter of each affine coupling layer to prevent division by eps',default=0.5)
     parser.add_argument('-last_zeros',type=bool,help='whether to initialize last layer ot NN with zeros',default=True)
     parser.add_argument('-n_data',type=int,help='no. of training images to use',default=800)
     parser.add_argument('-batchsize',type=int,help='batch size for training',default=3)

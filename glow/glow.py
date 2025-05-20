@@ -16,7 +16,7 @@ else:
 
 class Glow(nn.Module):
     def __init__(self, image_shape, K, L,
-                 coupling, device, n_bits_x=8, coupling_bias=0.1,
+                 coupling, device, n_bits_x=8, coupling_bias=0.5,
                  squeeze_contig=False, nn_init_last_zeros=False):
         super(Glow, self).__init__()
         self.image_shape = image_shape
