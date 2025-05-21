@@ -235,6 +235,13 @@ if __name__ == "__main__":
         torch.cuda.device_count()
         print("CUDA initialized successfully.")
         print(f"Using device: {args.device}, GPU count: {torch.cuda.device_count()}")
-            
+
+    if args.size == 64:
+        args.K = 48
+        args.L = 4
+    elif args.size == 128:
+        args.K = 32
+        args.L = 6
+        
     trainGlow(args)
     

@@ -1,8 +1,8 @@
 #!/bin/bash
 #BSUB -J {JOBNAME}
 #BSUB -q gpuq
-#BSUB -n 4
-#BSUB -R "select[ngpus>0] rusage[ngpus_shared=2]"
+#BSUB -n 8
+#BSUB -R "select[ngpus>0] rusage[ngpus_shared=2]" 
 #BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/output_{JOBNAME}.txt
 #BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/errput_{JOBNAME}.txt
 
