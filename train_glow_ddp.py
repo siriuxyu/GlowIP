@@ -193,7 +193,7 @@ def trainGlow(args, local_rank):
                       %(i,nll.item(),logdet,logpz,z_mu,z_std,grad_norm),end="\r")
             # saving generated samples during training (only on rank 0)
             try:
-                if j % args.sample_freq == 0 and dist.get_rank() == 0:
+                if global_step % args.sample_freq == 0 and dist.get_rank() == 0:
                     plt.plot(global_loss)
                     plt.xlabel("iterations",size=15)
                     plt.ylabel("nll",size=15)
@@ -212,8 +212,9 @@ def trainGlow(args, local_rank):
                             os.makedirs(save_path+"/samples_training")
                         x_gen = (np.clip(x_gen, 0, 1) * 255).astype("uint8")
                         sio.imsave(save_path+"/samples_training/%0.6d.jpg"%global_step, x_gen )
-            except:
+            except Exception as e:
                 if dist.get_rank() == 0:
+                    print(e)
                     print("\n failed to sample from glow at global step = %d"%global_step)
             global_step = global_step + 1
             global_loss.append(nll.item())
@@ -234,6 +235,7 @@ if __name__ == "__main__":
     parser.add_argument('-coupling',type=str,help='type of coupling layer to use',default='affine')
     parser.add_argument('-last_zeros',type=bool,help='whether to initialize last layer ot NN with zeros',default=True)
     parser.add_argument('-batchsize',type=int,help='batch size for training',default=3)
+    parser.add_argument('-n_data',type=int,help='number of data for training',default=8000)
     parser.add_argument('-size',type=int,help='images will be resized to this dimension',default=64)
     parser.add_argument('-lr',type=float,help='learning rate for training',default=1e-5)
     parser.add_argument('-n_bits_x',type=int,help='requantization of training images',default=5)

@@ -51,7 +51,7 @@ def trainGlow(args):
     model_path = save_path + "glowmodel.pt"
     if args.dataset == "celeba":
         channel = 3
-    elif args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]:
+    elif args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512", "BraTS_png"]:
         channel = 1
     else:
         raise ValueError("dataset not supported")
@@ -100,12 +100,18 @@ def trainGlow(args):
     
     # setting up dataloader
     print("setting up dataloader for the training data")
-    if args.dataset == "celeba":
-        trans      = transforms.Compose([transforms.Resize(args.size),
-                                        transforms.CenterCrop((args.size, args.size)),
-                                        transforms.ToTensor()])
+    if args.dataset in ["BraTS_png", "celeba"]:
+        if args.dataset == "BraTS_png":
+            trans      = transforms.Compose([transforms.Grayscale(num_output_channels=1),
+                                            transforms.Resize(args.size),
+                                            transforms.CenterCrop((args.size, args.size)),
+                                            transforms.ToTensor()])
+        else:
+            trans      = transforms.Compose([transforms.Resize(args.size),
+                                            transforms.CenterCrop((args.size, args.size)),
+                                            transforms.ToTensor()])
         dataset    = datasets.ImageFolder(training_folder, transform=trans)
-    if args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]:
+    elif args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]:
         dataset    = NPZDataset(npz_file, size=args.size)
         dataset.sample_images(args.n_data)
 
@@ -135,7 +141,7 @@ def trainGlow(args):
             opt.zero_grad()
             core_glow.zero_grad()
             # loading batch
-            if args.dataset == "celeba":
+            if args.dataset in ["BraTS_png", "celeba"]:
                 data = data[0]
             x = data.to(device=args.device)*255
             # pre-processing data
@@ -176,6 +182,7 @@ def trainGlow(args):
                     plt.plot(global_loss)
                     plt.xlabel("iterations",size=15)
                     plt.ylabel("nll",size=15)
+                    plt.ylim(0, 10)
                     plt.savefig(save_path+"/nll_training_curve.jpg")
                     plt.close()
                     print("\n saving generated samples at global step = %d"%global_step)
@@ -221,7 +228,7 @@ if __name__ == "__main__":
     parser.add_argument('-n_bits_x',type=int,help='requantization of training images',default=5)
     parser.add_argument('-epochs',type=int,help='epochs to train for',default=500)
     parser.add_argument('-warmup_iter',type=int,help='no. of warmup iterations',default=10000)
-    parser.add_argument('-sample_freq',type=int,help='sample after every save_freq',default=50)
+    parser.add_argument('-sample_freq',type=int,help='sample after every save_freq',default=500)
     parser.add_argument('-save_freq',type=int,help='save after every save_freq',default=1000)
     parser.add_argument('-squeeze_contig', action="store_true", help="whether to select contiguous components of activations in each squeeze layer")
     parser.add_argument('-device',type=str,help='whether to use',default="cuda")  
@@ -239,9 +246,11 @@ if __name__ == "__main__":
     if args.size == 64:
         args.K = 48
         args.L = 4
+        args.lr = 1e-5
     elif args.size == 128:
         args.K = 32
         args.L = 6
+        args.lr = 5e-5
         
     trainGlow(args)
     

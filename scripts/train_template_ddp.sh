@@ -1,55 +1,60 @@
 #!/bin/bash
 #BSUB -J {JOBNAME}
 #BSUB -q gpuq
-#BSUB -n 16
-#BSUB -R "span[ptile=4] select[ngpus>0] rusage[ngpus_shared=8]" 
+#BSUB -n 8
+#BSUB -R "span[ptile=4] select[ngpus>0] rusage[ngpus_shared=4]" 
 #BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/output_{JOBNAME}.txt
 #BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/errput_{JOBNAME}.txt
+#BSUB -W 24:00
 
-# Set environment variables
-export PATH=/gpfsdata/home/Zhaobo_hengjia21/anaconda3/bin:$PATH
-export PATH=/gpfsdata/home/Zhaobo_hengjia21/anaconda3/envs/gpu122/bin:$PATH
-export LD_LIBRARY_PATH=/gpfsdata/home/Zhaobo_hengjia21/anaconda3/envs/gpu122/bin:$LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=/usr/lib/:$LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=/usr/lib64/:$LD_LIBRARY_PATH
-
-# Change to project directory
-cd /gpfsdata/home/Zhaobo_hengjia21/GlowIP
 source ~/anaconda3/etc/profile.d/conda.sh
 conda activate gpu122
+cd /gpfsdata/home/Zhaobo_hengjia21/GlowIP
 
-# Get the hostname of the master node
-export MASTER_ADDR=$(hostname)
-export MASTER_PORT=29500
 
-# Get node rank from LSB_JOBINDEX if available, otherwise default to 0
-if [ -z "${LSB_JOBINDEX}" ]; then
-    export NODE_RANK=0
+# -------- 解析节点 ----------
+if [[ -n "$LSB_DJOB_HOSTFILE" && -s "$LSB_DJOB_HOSTFILE" ]]; then
+    NODES=( $(sort -u "$LSB_DJOB_HOSTFILE") )
 else
-    # LSB_JOBINDEX starts from 1, so subtract 1 for zero-based rank
-    export NODE_RANK=$((LSB_JOBINDEX-1))
+    # LSB_HOSTS 是空格分隔字符串：gpu06 gpu06 gpu04 …
+    NODES=( $(echo "$LSB_HOSTS" | tr ' ' '\n' | sort -u) )
 fi
 
-# Set NCCL environment variables for better performance
+GPUS_PER_NODE=2
+NUM_NODES=${#NODES[@]}
+WORLD_SIZE=$((NUM_NODES * GPUS_PER_NODE))
+MASTER_ADDR=${NODES[0]}
+MASTER_PORT=29500
+
 export NCCL_DEBUG=INFO
-export NCCL_IB_DISABLE=0
-export NCCL_NET_GDR_LEVEL=2
+export NCCL_SOCKET_IFNAME=ib0   # 如无 RDMA，可注释
+export OMP_NUM_THREADS=4
 
-echo "Starting training on node ${NODE_RANK} with master node ${MASTER_ADDR}"
+echo "[DEBUG] nodes=${NODES[*]}"
+if [[ ${#NODES[@]} -eq 0 ]]; then
+    echo "[ERROR] 解析节点失败，脚本终止"; exit 1
+fi
 
-torchrun \
-  --nproc_per_node=2 \
-  --nnodes=4 \
-  --node_rank=${NODE_RANK} \
-  --master_addr=${MASTER_ADDR} \
-  --master_port=${MASTER_PORT} \
-  train_glow_ddp.py \
-  -batchsize {BATCHSIZE} \
-  -dataset {DATASET} \
-  -size {SIZE} \
-  -job_id {JOBID} \
-  -epochs 800 \
-  -n_data 800 \
-  -lr 5e-5 \
-  -coupling_bias {COUPLING_BIAS} \
-  >> {LOGFILE}
+echo "[DDP] MASTER=$MASTER_ADDR:$MASTER_PORT  WORLD_SIZE=$WORLD_SIZE"
+
+# ---------- 在每个节点启动 torchrun ----------
+for idx in "${!NODES[@]}"; do
+  host=${NODES[$idx]}
+  NODE_RANK=$idx
+
+  blaunch -z ${host} \
+    torchrun \
+      --nnodes ${NUM_NODES} \
+      --nproc_per_node ${GPUS_PER_NODE} \
+      --node_rank ${NODE_RANK} \
+      --master_addr ${MASTER_ADDR} \
+      --master_port ${MASTER_PORT} \
+      train_glow_ddp.py \
+        -batchsize {BATCHSIZE} \
+        -dataset {DATASET} \
+        -size {SIZE} \
+        -job_id {JOBID} \
+        -coupling_bias {COUPLING_BIAS} \
+      >> results/{JOBNAME}_node${NODE_RANK}.log 2>&1 &
+done
+wait

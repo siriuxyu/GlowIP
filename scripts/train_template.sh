@@ -22,7 +22,6 @@ python train_glow.py \
   -size {SIZE} \
   -job_id {JOBID} \
   -epochs 800 \
-  -n_data 800 \
-  -lr 5e-5 \
+  -n_data 8000 \
   -coupling_bias {COUPLING_BIAS} \
   >> {LOGFILE}
