@@ -24,7 +24,7 @@ def GlowCS(args):
     
     if args.dataset == "celeba":
         channels = 3
-    elif args.dataset == "BraTS":
+    elif args.dataset == "BraTS" or args.dataset == "BraTS_png":
         channels = 1
     else:
         raise "dataset not defined"
@@ -34,8 +34,9 @@ def GlowCS(args):
         n                  = args.size * args.size * 1      # 1 channel for MRI
         modeldir           = f"./trained_models/{args.dataset}/glow_{args.size}_{args.job_id}/"
         # test_folder        = "./test_images/%s"%args.dataset
-        npz_file           = f"./data/test_data/{args.dataset}/{args.dataset}_test.npz"
-        save_path          = "./results/%s/%s"%(args.dataset,args.experiment)
+        # npz_file           = f"./data/test_data/{args.dataset}/{args.dataset}_test.npz"
+        npz_file           = f"./data/test_data/BraTS/BraTS_test.npz"
+        save_path          = f"./results/{args.dataset}/{args.experiment}"
 
         # loading dataset
         test_dataset    = NPZDataset(npz_file, size=args.size)

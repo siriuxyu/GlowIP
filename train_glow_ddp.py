@@ -124,7 +124,13 @@ def trainGlow(args, local_rank):
                                         transforms.CenterCrop((args.size, args.size)),
                                         transforms.ToTensor()])
         dataset    = datasets.ImageFolder(training_folder, transform=trans)
-    if args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]:
+    elif args.dataset == "BraTS_png":
+        trans      = transforms.Compose([transforms.Grayscale(num_output_channels=1),
+                                        transforms.Resize(args.size),  
+                                        transforms.CenterCrop((args.size, args.size)),
+                                        transforms.ToTensor()])
+        dataset    = datasets.ImageFolder(training_folder, transform=trans)
+    elif args.dataset in ["BraTS", "LDCT", "LIDC_320", "LIDC_512"]:
         dataset    = NPZDataset(npz_file, size=args.size)
         dataset.sample_images(800)
         
