@@ -12,14 +12,15 @@ coupling_bias="$6"
 job_name="${mode}_${dataset}_${size}_${job_id}"
 
 
-output_file="results/output_${job_name}.txt"
-error_file="results/errput_${job_name}.txt"
-log_file="results/${job_name}_log.txt"
+output_file="results/${mode}/output_${job_name}.txt"
+error_file="results/${mode}/errput_${job_name}.txt"
+log_file="results/logs/${job_name}_log.txt"
 script_template="scripts/${mode}_template.sh"
-temp_script="scripts/job_${job_name}_temp.sh"
+temp_script="scripts/${mode}/job_${job_name}_temp.sh"
 
 # Substitute placeholders in the job template
 sed "s#{SIZE}#${size}#g; \
+     s#{MODE}#${mode}#g; \
      s#{BATCHSIZE}#${batchsize}#g; \
      s#{JOBNAME}#${job_name}#g; \
      s#{DATASET}#${dataset}#g; \

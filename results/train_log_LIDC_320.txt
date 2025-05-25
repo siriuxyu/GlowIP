@@ -1,7 +1,0 @@
-CUDA initialized successfully.
-Using device: cuda, GPU count: 2
-creating directory to save model weights
-creating and initializing model for training
-saving configs as json file
-setting up dataloader for the training data
-+-+-+-+-+-+-+-+-+-+- starting training -+-+-+-+-+-+-+-+-+-+

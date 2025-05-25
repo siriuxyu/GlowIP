@@ -40,6 +40,7 @@ def GlowCS(args):
 
         # loading dataset
         test_dataset    = NPZDataset(npz_file, size=args.size)
+        test_dataset.sample_images(args.batchsize * 4)
         test_dataloader = DataLoader(test_dataset,batch_size=args.batchsize,drop_last=True,shuffle=False)
         
         # loading glow configurations
@@ -100,7 +101,7 @@ def GlowCS(args):
             
             # to avoid lazy initialization of actnorm
             with torch.no_grad():
-                core_glow(torch.randn(1, channels, 128, 128).to(args.device))
+                core_glow(torch.randn(1, channels, args.size, args.size).to(args.device))
             
             # making a forward to record shapes of z's for reverse pass
             _ = glow(core_glow.preprocess(torch.zeros_like(x_test)))
@@ -160,6 +161,7 @@ def GlowCS(args):
             # getting recovered and true images
             with torch.no_grad():
                 x_test_np = x_test.data.cpu().numpy().transpose(0,2,3,1)
+                x_cs_np   = torch.matmul(x_test, A).data.cpu().numpy().transpose(0,2,3,1)
                 z_unflat  = core_glow.unflatten_z(z_sampled, clone=False)
                 x_gen     = glow(z_unflat, reverse=True, reverse_clone=False)
                 x_gen     = core_glow.postprocess(x_gen,floor_clamp=False)
@@ -217,7 +219,8 @@ def GlowCS(args):
         # setting folder to save results in 
         if args.save_results:
             gamma = gamma.item()
-            file_names = [name[0].split("/")[-1] for name in test_dataset.samples]
+            file_names = np.arange(len(Recovered))
+            # file_names = [name[0].split("/")[-1] for name in test_dataset.samples]
             if args.init_strategy == "random":
                 save_path_template = save_path + "/cs_m_%d_gamma_%0.6f_steps_%d_lr_%0.3f_init_std_%0.2f_optim_%s"
                 save_path = save_path_template%(m,gamma,args.steps,args.lr,args.init_std,args.optim)
@@ -239,8 +242,12 @@ def GlowCS(args):
                     if not os.path.exists(save_path_2):
                         os.makedirs(save_path_2)
                         save_path = save_path_2
+            print(f"Saving results to {save_path}")
             # saving results now
-            _ = [sio.imsave(save_path+"/"+name, x) for x,name in zip(Recovered,file_names)]
+            try:
+                _ = [sio.imsave(save_path+"/"+str(name), x) for x,name in zip(Recovered,file_names)]
+            except Exception as e:
+                print(f"\n[ERROR] Saving results failed due to: {e}")
             Residual_Curve = np.array(Residual_Curve).mean(axis=0)
             np.save(save_path+"/original.npy", Original)
             np.save(save_path+"/recovered.npy", Recovered)

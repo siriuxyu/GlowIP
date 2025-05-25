@@ -3,8 +3,8 @@
 #BSUB -q gpuq
 #BSUB -n 4
 #BSUB -R "select[ngpus>0] rusage[ngpus_shared=2]"
-#BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/output_{JOBNAME}.txt
-#BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/errput_{JOBNAME}.txt
+#BSUB -o /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/{MODE}/output_{JOBNAME}.txt
+#BSUB -e /gpfsdata/home/Zhaobo_hengjia21/GlowIP/results/{MODE}/errput_{JOBNAME}.txt
 
 export PATH=/gpfsdata/home/Zhaobo_hengjia21/anaconda3/bin:$PATH
 export PATH=/gpfsdata/home/Zhaobo_hengjia21/anaconda3/envs/gpu122/bin:$PATH
