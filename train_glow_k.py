@@ -100,7 +100,7 @@ def trainGlow(args):
             json.dump(configs, f, sort_keys=True, indent=4, ensure_ascii=False)
             
     # setting up k-space transform
-    trans = PseudoKSpace()
+    kspace_trans = PseudoKSpace()
     
     # setting up dataloader
     print("setting up dataloader for the training data")
@@ -147,10 +147,10 @@ def trainGlow(args):
             # loading batch
             if args.dataset in ["BraTS_png", "celeba"]:
                 data = data[0]
-            # x = data.to(device=args.device)*255
+            x = data.to(device=args.device)
             # # pre-processing data
             # x = core_glow.preprocess(x)
-            x_kspace = trans(data.to(device=args.device))
+            x_kspace = kspace_trans(x)
             # computing loss: "nll"
             nll,logdet,logpz,z_mu,z_std = glow(x_kspace)
             # skipping first batch due to data dependant initialization (if not initialized)
@@ -196,7 +196,7 @@ def trainGlow(args):
                             core_glow(torch.randn(1, channel, args.size, args.size).to(args.device))
                         z_sample, z_sample_t = core_glow.generate_z(n=10,mu=0,std=0.7,to_torch=True)
                         x_gen_k = glow(z_sample_t, reverse=True)
-                        x_gen = trans(x_gen_k, reverse=True)
+                        x_gen = kspace_trans(x_gen_k, reverse=True)
                         # x_gen = core_glow.postprocess(x_gen)
                         x_gen = make_grid(x_gen,nrow=int(np.sqrt(len(x_gen))))
                         x_gen = x_gen.data.cpu().numpy()
@@ -320,7 +320,7 @@ if __name__ == "__main__":
     parser.add_argument('-n_bits_x',type=int,help='requantization of training images',default=5)
     parser.add_argument('-epochs',type=int,help='epochs to train for',default=500)
     parser.add_argument('-warmup_iter',type=int,help='no. of warmup iterations',default=10000)
-    parser.add_argument('-sample_freq',type=int,help='sample after every save_freq',default=500)
+    parser.add_argument('-sample_freq',type=int,help='sample after every save_freq',default=50)
     parser.add_argument('-save_freq',type=int,help='save after every save_freq',default=1000)
     parser.add_argument('-squeeze_contig', action="store_true", help="whether to select contiguous components of activations in each squeeze layer")
     parser.add_argument('-device',type=str,help='whether to use',default="cuda")  

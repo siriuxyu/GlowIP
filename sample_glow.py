@@ -10,6 +10,93 @@ import argparse
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
+
+
+class PseudoKSpace(torch.nn.Module):
+    """
+        forward(img, mode="to_k")    # image -> 2-chan k-space
+        forward(k2c, mode="to_img")  # 2-chan k-space -> image
+    """
+    def __init__(self, eps: float = 1e-8):
+        super().__init__()
+        self.eps = eps
+
+    def forward(self, x: torch.Tensor, reverse: bool = False) -> torch.Tensor:
+
+        if not reverse:
+            return self.to_kspace(x)
+        
+        elif reverse:
+            return self.to_image(x)
+
+    # ---------- image -> 2-channel k-space ----------
+    def to_kspace(self, img: torch.Tensor) -> torch.Tensor:
+        """
+        img: (B, 1, H, W) or (B, H, W) or (H, W)
+        return: (B, 2, H, W) or (2, H, W)
+        """
+        single = img.ndim == 2           # 记录是否无 batch 无 channel
+        if single:
+            img = img[None, None]        # -> (1,1,H,W)
+        elif img.ndim == 3:              # (B,H,W)
+            img = img[:, None]           # -> (B,1,H,W)
+
+        # 2D FFT
+        k = torch.fft.fftshift(torch.fft.fft2(img.float(), norm="ortho"))
+
+        # 分离实虚并做 0-1 归一化（逐样本）
+        real, imag = k.real, k.imag
+        r_min, r_max = real.amin(dim=(-2, -1), keepdim=True), real.amax(dim=(-2, -1), keepdim=True)
+        i_min, i_max = imag.amin(dim=(-2, -1), keepdim=True), imag.amax(dim=(-2, -1), keepdim=True)
+        print(f"r_min: {r_min.shape}, r_max: {r_max.shape}, i_min: {i_min.shape}, i_max: {i_max.shape}")
+
+        real_n = (real - r_min) / (r_max - r_min).clamp_min(self.eps)
+        imag_n = (imag - i_min) / (i_max - i_min).clamp_min(self.eps)
+        print(f"real_n: {real_n.shape}, imag_n: {imag_n.shape}")
+
+        k2c = torch.cat([real_n, imag_n], dim=1)   # (B,2,H,W)
+
+        # 把 min/max 存到 buffer 里，方便反归一化（也可 return 字典更灵活）
+        self.r_min = r_min.squeeze(1)
+        self.r_max = r_max.squeeze(1)
+        self.i_min = i_min.squeeze(1)
+        self.i_max = i_max.squeeze(1)
+
+        if single:
+            k2c = k2c[0]  # -> (2,H,W)
+        return k2c
+
+    # ---------- 2-channel k-space -> image ----------
+    def to_image(self, k2c: torch.Tensor) -> torch.Tensor:
+        """
+        k2c: (B,2,H,W) or (2,H,W)
+        return: (B,1,H,W) or (H,W)
+        """
+        single = k2c.ndim == 3           # (2,H,W)
+        if single:
+            k2c = k2c[None]              # -> (1,2,H,W)
+
+        real_n, imag_n = k2c[:, 0], k2c[:, 1]
+        
+
+        # 反归一化
+        real = real_n * (self.r_max - self.r_min) + self.r_min
+        imag = imag_n * (self.i_max - self.i_min) + self.i_min
+        print(f"real: {real.shape}, imag: {imag.shape}")
+
+        # 复数重组 & IFFT
+        k_complex = torch.complex(real, imag)
+        print(f"k_complex: {k_complex.shape}")
+        img = torch.fft.ifft2(torch.fft.ifftshift(k_complex), norm="ortho").real  # (B,H,W)
+
+        img = img[:, None]  # -> (B,1,H,W)
+
+        if single:
+            img = img[0, 0]  # -> (H,W)
+        return img
+ 
+
+
 def sampleGlow(args):
     if args.dataset == "BraTS_png":
         channels = 1
@@ -55,6 +142,8 @@ def sampleGlow(args):
 
     else:
         raise FileNotFoundError(f"Model file {model_path} not found. Please check the path.")
+    
+    kspace_trans = PseudoKSpace()
 
     
     for i in range(args.epochs):
@@ -62,8 +151,9 @@ def sampleGlow(args):
         with torch.no_grad():
             glow(torch.randn(1, channels, args.size, args.size).to(args.device))
             z_sample, z_sample_t = glow.generate_z(n=10,mu=0,std=0.7,to_torch=True)
-            x_gen = glow(z_sample_t, reverse=True)
-            x_gen = glow.postprocess(x_gen)
+            x_gen_kspace = glow(z_sample_t, reverse=True)
+            x_gen = kspace_trans(x_gen_kspace, reverse=True)
+            # x_gen = glow.postprocess(x_gen_kspace)
             x_gen = make_grid(x_gen,nrow=int(np.sqrt(len(x_gen))))
             x_gen = x_gen.data.cpu().numpy()
             x_gen = x_gen.transpose([1,2,0])
@@ -133,7 +223,7 @@ if __name__ == "__main__":
     parser.add_argument('-epochs',type=int,help='epochs to train for',default=10)
     parser.add_argument('-device',type=str,help='whether to use',default="cpu")  
     parser.add_argument('-job_id', type=str, help='job id to save the model', default=0) 
-    parser.add_argument('-exp', type=str, help='experiment name', default="0")
+    parser.add_argument('-exp', type=str, help='experiment name', default="1")
     args = parser.parse_args()
     # Try to initialize CUDA, fallback to CPU if fails
     # if args.device == "cuda":
