@@ -9,6 +9,8 @@ import json
 import argparse
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+
 
 
 
@@ -193,25 +195,45 @@ def sampleBraTS(args):
 
 
 def sampleRecovered(args):
-    total_dir = f"./results/{args.dataset}/{args.exp}"
+    total_dir = f"./results/{args.dataset}_{args.size}/{args.exp}"
     for exp_dir in os.listdir(total_dir):
         if os.path.isdir(os.path.join(total_dir, exp_dir)):
             # read the recovered.npy file
-            original = np.load(os.path.join(total_dir, exp_dir, "original.npy")).squeeze(-1)
-            recovered = np.load(os.path.join(total_dir, exp_dir, "recovered.npy")).squeeze(-1)
+            original = np.load(os.path.join(total_dir, exp_dir, "original.npy"))
+            recovered = np.load(os.path.join(total_dir, exp_dir, "recovered.npy"))
+            # error = abs(recovered - original) / original, but if original is 0, then error is 0
+            error = np.abs(recovered - original)
+            error[original != 0] = error[original != 0] / original[original != 0]         
             
             # change from F mode to C mode
             original = (original * 255).clip(0, 255).astype(np.uint8)
             recovered = (recovered * 255).clip(0, 255).astype(np.uint8)
 
             print(f"saving recovered images to {os.path.join(total_dir, exp_dir, 'samples_recovered')}")
-            
             os.makedirs(os.path.join(total_dir, exp_dir, "samples_recovered"), exist_ok=True)
+            os.makedirs(os.path.join(total_dir, exp_dir, "error_map"), exist_ok=True)
             count = 0
             for i in range(len(recovered)):
                 # save the recovered images and original images in a grid
                 recovered_grid = np.concatenate([original[i], recovered[i]], axis=1)
-                sio.imsave(os.path.join(total_dir, exp_dir, "samples_recovered", "recovered_%0.6d.png"%i), recovered_grid)
+                plt.figure(figsize=(8, 10))
+                im = plt.imshow(recovered_grid, cmap='gray')
+                plt.axis('off')
+                cbar = plt.colorbar(im, cmap='gray', fraction=0.025, pad=0.04, aspect=20)
+                plt.tight_layout(pad=2.0)  # Add padding around the plot
+                plt.savefig(os.path.join(total_dir, exp_dir, "samples_recovered", "recovered_%0.6d.png"%i), 
+                           bbox_inches='tight', pad_inches=0.5)  # Add padding in saved image
+                plt.close()
+
+                # Error map with hot colormap
+                plt.figure(figsize=(8, 10))
+                im = plt.imshow(error[i], cmap='hot', vmin=0, vmax=1)
+                plt.axis('off')
+                cbar = plt.colorbar(im, cmap='hot', fraction=0.046, pad=0.04, aspect=20)
+                plt.tight_layout(pad=2.0)  # Add padding around the plot
+                plt.savefig(os.path.join(total_dir, exp_dir, "error_map", "error_%0.6d.png"%i), 
+                           bbox_inches='tight', pad_inches=0.5)  # Add padding in saved image
+                plt.close()
                 count += 1
             print(f"saved {count} images in {exp_dir}")
 
@@ -225,14 +247,6 @@ if __name__ == "__main__":
     parser.add_argument('-job_id', type=str, help='job id to save the model', default=0) 
     parser.add_argument('-exp', type=str, help='experiment name', default="1")
     args = parser.parse_args()
-    # Try to initialize CUDA, fallback to CPU if fails
-    # if args.device == "cuda":
-    #     if not torch.cuda.is_available():
-    #         raise RuntimeError("CUDA not available")
-    #     # force trigger device count to check CUDA runtime
-    #     torch.cuda.device_count()
-    #     print("CUDA initialized successfully.")
-    #     print(f"Using device: {args.device}, GPU count: {torch.cuda.device_count()}")
             
     # sampleGlow(args)
     # sampleBraTS(args)
