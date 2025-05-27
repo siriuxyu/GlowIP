@@ -50,7 +50,7 @@ def GlowCSK(args):
         skip_to_next = False # flag to skip to next loop if recovery is fails due to instability
         n                  = args.size * args.size * 1      # 1 channel for MRI
         modeldir           = f"./trained_models/{args.dataset}/glow_{args.size}_{args.job_id}/"
-        save_path          = f"./results/{args.dataset}/{args.experiment}"
+        save_path          = f"./results/{args.dataset}_{args.size}/{args.experiment}"
 
         # loading glow configurations
         config_path = modeldir + "configs.json"
@@ -271,7 +271,7 @@ def GlowCSK(args):
         
         # saving printout
         if args.save_metrics_text:
-            with open("%s_cs_glow_results.txt"%args.dataset,"a") as f:
+            with open("%s_cs_glow_results_%s.txt"%(args.dataset,args.experiment),"a") as f:
                 f.write('\n' + printout)
     
         
