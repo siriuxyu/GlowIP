@@ -227,7 +227,7 @@ def sampleRecovered(args):
 
                 # Error map with hot colormap
                 plt.figure(figsize=(8, 10))
-                im = plt.imshow(error[i], cmap='hot', vmin=0, vmax=1)
+                im = plt.imshow(error[i], cmap='hot', vmin=0, vmax=0.5)
                 plt.axis('off')
                 cbar = plt.colorbar(im, cmap='hot', fraction=0.046, pad=0.04, aspect=20)
                 plt.tight_layout(pad=2.0)  # Add padding around the plot
@@ -236,7 +236,30 @@ def sampleRecovered(args):
                 plt.close()
                 count += 1
             print(f"saved {count} images in {exp_dir}")
-
+        
+def calculate_test_metrics(args):
+    from skimage.metrics import peak_signal_noise_ratio as compare_psnr
+    from skimage.metrics import structural_similarity as compare_ssim
+    from skimage.metrics import normalized_root_mse as compare_nrmse
+    total_dir = f"./results/{args.dataset}_{args.size}/{args.exp}"
+    for exp_dir in os.listdir(total_dir):
+        if os.path.isdir(os.path.join(total_dir, exp_dir)):
+            # read the recovered.npy file
+            original = np.load(os.path.join(total_dir, exp_dir, "original.npy"))
+            recovered = np.load(os.path.join(total_dir, exp_dir, "recovered.npy"))
+            psnrs = []
+            ssims = []
+            nrmses = []
+            for i in range(len(original)):
+            # calculate the PSNR, SSIM, NRMSE
+                psnrs.append(compare_psnr(original[i], recovered[i]))
+                ssims.append(compare_ssim(original[i], recovered[i], data_range=1.0))
+                nrmses.append(compare_nrmse(original[i], recovered[i]))
+            print(f"PSNR: {np.mean(psnrs)}, SSIM: {np.mean(ssims)}, NRMSE: {np.mean(nrmses)}")
+            # save the raw metrics to txt
+            with open(os.path.join(total_dir, exp_dir, "metrics.txt"), "w") as f:
+                for i in range(len(psnrs)):
+                    f.write(f"{i}: PSNR: {psnrs[i]}, SSIM: {ssims[i]}, NRMSE: {nrmses[i]}\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train glow network')
@@ -251,3 +274,4 @@ if __name__ == "__main__":
     # sampleGlow(args)
     # sampleBraTS(args)
     sampleRecovered(args)
+    calculate_test_metrics(args)

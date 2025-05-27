@@ -237,7 +237,7 @@ def GlowCSK(args):
                 for c in range(x.shape[0]):
                     psnr_channels.append(compare_psnr(x[:, c, :, :], y[:, c, :, :]))
                     ssim_channels.append(compare_ssim(x[:, c, :, :], y[:, c, :, :], data_range=1.0))
-                    nrmse_channels.append(compare_nrmse(x[:, c, :, :], y[:, c, :, :], normalization='min-max'))
+                    nrmse_channels.append(compare_nrmse(x[:, c, :, :], y[:, c, :, :]))
                 psnr_list.append(np.mean(psnr_channels))
                 ssim_list.append(np.mean(ssim_channels))
                 nrmse_list.append(np.mean(nrmse_channels))
@@ -305,7 +305,7 @@ def GlowCSK(args):
             print(f"Saving results to {save_path}")
             # saving results now
             try:
-                _ = [sio.imsave(save_path+"/"+str(name), x) for x,name in zip(Recovered,file_names)]
+                _ = [sio.imsave(save_path+"/"+str(name)+".png", (x*255).astype(np.uint8)) for x,name in zip(Recovered,file_names)]
                 np.save(save_path+"/recored_z.npy", Recorded_Z)
             except Exception as e:
                 print(f"\n[ERROR] Saving results failed due to: {e}")
