@@ -218,8 +218,8 @@ def sampleRecovered(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train glow network')
-    parser.add_argument('-dataset',type=str,help='the dataset to train the model on', default='celeba')
-    parser.add_argument('-size',type=int,help='images will be resized to this dimension',default=64)
+    parser.add_argument('-dataset',type=str,help='the dataset to train the model on', default='BraTS_png')
+    parser.add_argument('-size',type=int,help='images will be resized to this dimension',default=128)
     parser.add_argument('-epochs',type=int,help='epochs to train for',default=10)
     parser.add_argument('-device',type=str,help='whether to use',default="cpu")  
     parser.add_argument('-job_id', type=str, help='job id to save the model', default=0) 

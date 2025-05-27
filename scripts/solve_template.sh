@@ -16,7 +16,7 @@ cd /gpfsdata/home/Zhaobo_hengjia21/GlowIP
 source ~/anaconda3/etc/profile.d/conda.sh
 conda activate gpu122
 
-python solve_cs.py -experiment 3 \
+python solve_cs.py -experiment {EXPERIMENT} \
         -lr 0.05 -steps 50 \
         -dataset {DATASET} \
         -model {DATASET} \

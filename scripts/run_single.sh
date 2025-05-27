@@ -9,7 +9,13 @@ batchsize="$3"
 size="$4"
 job_id="$5"
 coupling_bias="$6"
-job_name="${mode}_${dataset}_${size}_${job_id}"
+experiment="$7"
+
+if [ "$mode" = "train" ]; then
+    job_name="${mode}_${dataset}_${size}_${job_id}"
+else
+    job_name="${mode}_${dataset}_${size}_${job_id}_${experiment}"
+fi
 
 
 output_file="results/${mode}/output_${job_name}.txt"
@@ -26,7 +32,8 @@ sed "s#{SIZE}#${size}#g; \
      s#{DATASET}#${dataset}#g; \
      s#{LOGFILE}#${log_file}#g; \
      s#{JOBID}#${job_id}#g; \
-     s#{COUPLING_BIAS}#${coupling_bias}#g" \
+     s#{COUPLING_BIAS}#${coupling_bias}#g; \
+     s#{EXPERIMENT}#${experiment}#g" \
      "$script_template" > "$temp_script"
 
 sed -i 's/\r//' "$temp_script"

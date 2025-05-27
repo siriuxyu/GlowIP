@@ -1,5 +1,5 @@
 import argparse
-from solvers.cs_glow import GlowCS, GlowCSK
+from solvers.cs_glow import GlowCSK
 
 
 if __name__ == "__main__":
