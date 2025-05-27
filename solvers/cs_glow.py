@@ -50,7 +50,7 @@ def GlowCSK(args):
         skip_to_next = False # flag to skip to next loop if recovery is fails due to instability
         n                  = args.size * args.size * 1      # 1 channel for MRI
         modeldir           = f"./trained_models/{args.dataset}/glow_{args.size}_{args.job_id}/"
-        save_path          = f"./results/{args.dataset}/{args.experiment}"
+        save_path          = f"./results/{args.dataset}_{args.size}/{args.experiment}"
 
         # loading glow configurations
         config_path = modeldir + "configs.json"
@@ -181,15 +181,16 @@ def GlowCSK(args):
             with torch.no_grad():
                 x_test_k_flat = x_test_k.view([-1,n]) 
                 y_test_k = x_test_k_flat * A
-                x_test_np = x_test.data.cpu().numpy().transpose(0,2,3,1)
-                x_test_k_np = x_test_k.data.cpu().numpy().transpose(0,2,3,1)
+                x_test_np = x_test.data.cpu().numpy().squeeze(1)
+                x_test_np = np.clip(x_test_np,0,1)
+                x_test_k_np = x_test_k.data.cpu().numpy().squeeze(1)
                 y_test_k_np = y_test_k.data.cpu().numpy()
                 z_unflat  = core_glow.unflatten_z(z_sampled, clone=False)
                 x_gen     = glow(z_unflat, reverse=True, reverse_clone=False)
                 x_gen     = core_glow.postprocess(x_gen,floor_clamp=False)
                 x_gen_k   = img_to_k(x_gen)
-                x_gen_np  = x_gen.data.cpu().numpy().transpose(0,2,3,1)
-                x_gen_k_np  = x_gen_k.data.cpu().numpy().transpose(0,2,3,1)
+                x_gen_np  = x_gen.data.cpu().numpy().squeeze(1)
+                x_gen_k_np  = x_gen_k.data.cpu().numpy().squeeze(1)
                 x_gen_np  = np.clip(x_gen_np,0,1)
                 z_recov   = z_sampled.data.cpu().numpy()
             
@@ -229,14 +230,14 @@ def GlowCSK(args):
         
         for x, y in zip(Original, Recovered):
             # For multi-channel images, calculate metrics for each channel and average
-            if x.shape[-1] > 1:  # Multi-channel image
+            if (len(x.shape) > 2) and (x.shape[0] > 1):
                 psnr_channels = []
                 ssim_channels = []
                 nrmse_channels = []
-                for c in range(x.shape[-1]):
-                    psnr_channels.append(compare_psnr(x[..., c], y[..., c]))
-                    ssim_channels.append(compare_ssim(x[..., c], y[..., c], data_range=1.0))
-                    nrmse_channels.append(compare_nrmse(x[..., c], y[..., c], normalization='min-max'))
+                for c in range(x.shape[0]):
+                    psnr_channels.append(compare_psnr(x[:, c, :, :], y[:, c, :, :]))
+                    ssim_channels.append(compare_ssim(x[:, c, :, :], y[:, c, :, :], data_range=1.0))
+                    nrmse_channels.append(compare_nrmse(x[:, c, :, :], y[:, c, :, :], normalization='min-max'))
                 psnr_list.append(np.mean(psnr_channels))
                 ssim_list.append(np.mean(ssim_channels))
                 nrmse_list.append(np.mean(nrmse_channels))
@@ -271,7 +272,7 @@ def GlowCSK(args):
         
         # saving printout
         if args.save_metrics_text:
-            with open("%s_cs_glow_results.txt"%args.dataset,"a") as f:
+            with open("%s_cs_glow_results_%s.txt"%(args.dataset,args.experiment),"a") as f:
                 f.write('\n' + printout)
     
         
@@ -305,6 +306,7 @@ def GlowCSK(args):
             # saving results now
             try:
                 _ = [sio.imsave(save_path+"/"+str(name), x) for x,name in zip(Recovered,file_names)]
+                np.save(save_path+"/recored_z.npy", Recorded_Z)
             except Exception as e:
                 print(f"\n[ERROR] Saving results failed due to: {e}")
             Residual_Curve = np.array(Residual_Curve).mean(axis=0)

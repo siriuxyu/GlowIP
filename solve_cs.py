@@ -25,5 +25,13 @@ if __name__ == "__main__":
     parser.add_argument('-z_penalty_unsquared', action="store_true",help="use ||z|| if True else ||z||^2")
     parser.add_argument('-job_id', type=str, help='job id to use for logging', default='0')
     args = parser.parse_args()
+
+    m_new = []
+    down_sample_rate = [2, 3, 4, 8]
+    n = args.size * args.size
+    for down_sample_rate in down_sample_rate:
+        m_new.append(n // down_sample_rate)
+    args.m = m_new
+    args.gamma = [0] * len(m_new)
     GlowCSK(args)
     
